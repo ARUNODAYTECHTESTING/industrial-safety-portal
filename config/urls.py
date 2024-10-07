@@ -20,21 +20,27 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
 from django.conf import settings
-
-schema_view = get_schema_view(
-   openapi.Info(
-      title="OCR API",
-      default_version='v1',
-   ),
-
-
-   public=True,
-   permission_classes=(permissions.AllowAny,),
-)
-if settings.DEBUG:
-    openapi.Info['url']='http://ec2-13-126-227-202.ap-south-1.compute.amazonaws.com:1337/'
+if not settings.DEBUG:
+    schema_view = get_schema_view(
+        openapi.Info(
+            title="OCR API",
+            default_version='v1',
+        ),
+        url='http://ec2-13-126-227-202.ap-south-1.compute.amazonaws.com:1337/',
+        public=True,
+        permission_classes=(permissions.AllowAny,),
+    )
 else:
-    openapi.Info['url']url='http://localhost:8000/'
+    schema_view = get_schema_view(
+        openapi.Info(
+            title="OCR API",
+            default_version='v1',
+        ),
+        url='http://localhost:1337/',
+        public=True,
+        permission_classes=(permissions.AllowAny,),
+    )
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),

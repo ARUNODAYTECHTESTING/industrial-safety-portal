@@ -34,7 +34,7 @@ schema_view = get_schema_view(
 if settings.DEBUG:
     openapi.Info['url'] = url='http://ec2-13-126-227-202.ap-south-1.compute.amazonaws.com:1337/'
 else:
-     openapi.Info['url'] = url='http://localhost:8000/'
+    openapi.Info['url'] = url='http://localhost:8000/'
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("account/", include('account.api.urls')),

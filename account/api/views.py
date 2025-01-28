@@ -9,22 +9,28 @@ from account import models as account_models
 from django.contrib.auth.models import Group
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import permissions
+from django.contrib.auth.mixins import UserPassesTestMixin
+from account import permissions as account_permissions
 from account import utils as account_utils
 # Create your views here.
 
-class Department(views.APIView):
+class Department(UserPassesTestMixin,views.APIView):
     permission_classes = [permissions.IsAuthenticated]
+
+    def test_func(self):
+        return self.request.user.has_perm('account.can_view_department')
+
     @swagger_auto_schema(
         tags=['Department'],
         operation_summary="List all departments",
         operation_description="Retrieve a list of all departments."
     )
     def get(self, request, *args, **kwargs):
-        status, data,serializer = None, None,None
+        status,data = None, None
         try:
             departments = account_query.DepartmentRepository().get_all_departments()
-            status, data,serializer = shared_serializers.SerializerValidator(account_api_serializers.DepartmentSerializer).serialize_queryset(queryset=departments)
-            return Response({"status": status, "data": data}, HTTP_200_OK)
+            status,data = shared_serializers.SerializerValidator(account_api_serializers.DepartmentSerializer).serialize_queryset(queryset=departments)
+            return Response({"status": status, "data":data}, HTTP_200_OK)
         except Exception as e:
             return Response({"status": status, "data": str(e)}, HTTP_400_BAD_REQUEST)
 

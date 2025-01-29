@@ -5,12 +5,13 @@ services:
     build: 
       context: ./
       dockerfile: Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8005
     volumes:
+      - ./:/app/
       - static_volume:/app/static
       - media_volume:/app/media
     ports:
-      - 8000:8000
+      - 8005:8005
     env_file:
       - .env
     depends_on:

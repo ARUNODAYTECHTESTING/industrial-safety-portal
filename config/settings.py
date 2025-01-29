@@ -150,11 +150,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "account.User"
 
+# settings.py
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-    'rest_framework.authentication.TokenAuthentication',
-    ]
+        'rest_framework.authentication.TokenAuthentication',  # Token auth only
+    ],
+    
 }
+
 SWAGGER_SETTINGS = {
     'DEFAULT_AUTO_SCHEMA_CLASS': 'shared.swagger_inspectors.CustomSwaggerAutoSchema',
 

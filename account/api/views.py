@@ -14,11 +14,9 @@ from account import permissions as account_permissions
 from account import utils as account_utils
 # Create your views here.
 
-class Department(UserPassesTestMixin,views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class Department(views.APIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,]
 
-    def test_func(self):
-        return self.request.user.has_perm('account.can_view_department')
 
     @swagger_auto_schema(
         tags=['Department'],
@@ -45,6 +43,7 @@ class Department(UserPassesTestMixin,views.APIView):
             status,serializer = shared_serializers.SerializerValidator(account_api_serializers.DepartmentSerializer).validate(payload=request.data)
             if status in [400]:
                 return Response({"status": status, "data": serializer.errors}, status=HTTP_400_BAD_REQUEST)
+            account_query.DepartmentRepository().add_department(serializer.data['name'])
             return Response({"status": status, "data": serializer.data}, status=HTTP_200_OK)
         except Exception as e:
             return Response({"status": status, "data": str(e)}, HTTP_400_BAD_REQUEST)
@@ -83,22 +82,41 @@ class DepartmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(auto_schema=None)
     def put(self, request, *args, **kwargs):
         pass
-    
+ 
 class GroupView(generics.ListAPIView):
     queryset = Group.objects.all()
     serializer_class = account_api_serializers.GroupSerializer
-
+    
     @swagger_auto_schema(
         tags=['Group'],
         operation_summary="List all groups",
         operation_description="Retrieve a list of all groups."
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        '''
+        if user is Portal Admin:
+            return Super Admin,Admin,Auditor
+        elif user is Super Admin:
+            return Admin,Auditor
+        elif user is Admin:
+            return Auditor
+        '''
+        
+        user_type = None
+        if request.user.groups.filter().first().name == 'Portal Admin':
+            user_type = Group.objects.filter(name__in = ['Super Admin', 'Admin', 'Auditor']).values("id","name")
+        elif request.user.groups.filter().first().name == 'Super Admin':
+            user_type = Group.objects.filter(name__in = ['Admin', 'Auditor']).values("id","name")
+        elif request.user.groups.filter().first().name == 'Admin':
+            user_type = Group.objects.filter(name__in = ['Auditor']).values("id","name")
+        
+        return Response({"status": "200", "data": user_type}, status=HTTP_200_OK)
 
     
 
 class RegisterView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     @swagger_auto_schema(
         tags=['User'],
         request_body=account_api_serializers.UserSerializer,
@@ -110,8 +128,8 @@ class RegisterView(views.APIView):
             status,serializer = shared_serializers.SerializerValidator(serializer_class=account_api_serializers.UserSerializer).validate(payload=request.data)
             if status in [400]:
                 return Response({"status": status, 'data': serializer.errors}, status=HTTP_400_BAD_REQUEST)
-            serializer.save()
-            return Response({"status": status, 'data': serializer.data}, status=HTTP_200_OK)
+            serializer.save(manage_by = self.request.user)
+            return Response({"status": status, 'data': "Registration Successfull"}, status=HTTP_200_OK)
         except Exception as e:
             return Response({"status": status, 'data': str(e)}, status=HTTP_400_BAD_REQUEST)
 
@@ -129,6 +147,7 @@ class LoginView(views.APIView):
             if status in [400]:
                 return Response({"status": status, 'data': serializer.errors}, status=HTTP_400_BAD_REQUEST)
             user = account_query.UserQuery().get_user_by_token_id(token_id=serializer.data['token_id'])
+            print(f"User Found: {user}")
             if user is None or not user.check_password(serializer.data['password']):
                 return Response({"status":400,"data":"Invalid credentials"},status=HTTP_400_BAD_REQUEST)
             
@@ -136,3 +155,5 @@ class LoginView(views.APIView):
             return Response({"status": status, 'data': {'token':token}}, status=HTTP_200_OK)
         except Exception as e:
             return Response({"status": 400, 'data': str(e)}, status=HTTP_400_BAD_REQUEST)
+
+

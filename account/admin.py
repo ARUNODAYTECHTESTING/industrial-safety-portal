@@ -4,4 +4,3 @@ from account import models as account_models
 
 admin.site.register(account_models.Department)
 admin.site.register(account_models.User)
-admin.site.register(account_models.UserType)

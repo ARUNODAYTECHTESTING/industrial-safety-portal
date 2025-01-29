@@ -1,6 +1,7 @@
 from django.urls import path
 from equipment.api import views as equipment_views
 urlpatterns = [
+    path("plant/",equipment_views.PlantView.as_view(),name = 'plant'),
     path("equipment-type/",equipment_views.EquipmentTypeView.as_view(),name = 'equipment-type'),
     path("equipment-type-details/<int:pk>/",equipment_views.EquipmentTypeDetailsView.as_view(),name = 'equipment-type-details'),
     path("line/",equipment_views.LineView.as_view(),name = 'line'),

@@ -4,11 +4,6 @@ from django.contrib.auth.models import Group
 from account import utils as account_utils
 from equipment.api import serializers as equipment_api_serializers
 
-class UserType(serializers.ModelSerializer):
-
-    class Meta:
-        model = account_models.UserType
-        fields = ["id", "name"]
 
 class DepartmentSerializer(serializers.ModelSerializer):
 
@@ -24,11 +19,12 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class UserSerializer(serializers.ModelSerializer):
+    user_type = serializers.CharField(source = 'groups')
     class Meta:
         model = account_models.User
-        fields = ['id', 'token_id','name','password','user_type','department','department','plant','groups','email']
+        fields = ['id','name','password','user_type','department','plant','email','phone']
     
-
+    
     
     def create(self, validated_data):
         # Hash the password before creating the user
@@ -42,3 +38,6 @@ class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = account_models.User
         fields = ['token_id','password']
+
+
+

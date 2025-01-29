@@ -1,10 +1,17 @@
-from rest_framework import generics
+from rest_framework import generics,status
 from equipment import models as equipment_models
 from equipment.api import serializers as equipment_serializers
 from rest_framework.parsers import MultiPartParser
 from drf_yasg.utils import swagger_auto_schema
+from django.contrib.auth.mixins import UserPassesTestMixin
+from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
+from account import permissions as account_permissions
 
 class EquipmentTypeView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+
     queryset = equipment_models.Equipment.objects.all()
     serializer_class = equipment_serializers.EquipmentTypeSerializer
 
@@ -61,9 +68,11 @@ class EquipmentTypeDetailsView(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 class PlantView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin,]
     queryset = equipment_models.Plant.objects.all()
     serializer_class = equipment_serializers.PlantSerializer
-
+    
+    
     @swagger_auto_schema(
         tags=['Plant'],
         operation_summary="List and create plants",
@@ -83,6 +92,7 @@ class PlantView(generics.ListCreateAPIView):
     
 
 class LineView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
     queryset = equipment_models.Line.objects.all()
     serializer_class = equipment_serializers.LineSerializer
 
@@ -104,6 +114,7 @@ class LineView(generics.ListCreateAPIView):
 
 
 class LineDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
     queryset = equipment_models.Line.objects.all()
     serializer_class = equipment_serializers.LineSerializer
 
@@ -136,6 +147,7 @@ class LineDetailsView(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 class StationView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
     queryset = equipment_models.Station.objects.all()
     serializer_class = equipment_serializers.StationSerializer
 
@@ -158,6 +170,7 @@ class StationView(generics.ListCreateAPIView):
     
 
 class StationDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
     queryset = equipment_models.Station.objects.all()
     serializer_class = equipment_serializers.StationSerializer
 
@@ -190,6 +203,7 @@ class StationDetailsView(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 class EquipmentView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
     parser_classes = [MultiPartParser]
     queryset = equipment_models.Equipment.objects.all()
     serializer_class = equipment_serializers.EquipmentSerializer
@@ -212,6 +226,8 @@ class EquipmentView(generics.ListCreateAPIView):
 
 
 class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+
     parser_classes = [MultiPartParser]
     queryset = equipment_models.Equipment.objects.all()
     serializer_class = equipment_serializers.EquipmentSerializer
@@ -245,6 +261,8 @@ class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 class CheckListView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsAdmin|account_permissions.IsSuperAdmin|account_permissions.IsPortalAdmin]
+
     parser_classes = [MultiPartParser]
     queryset = equipment_models.CheckList.objects.all()
     serializer_class = equipment_serializers.CheckListSerializer

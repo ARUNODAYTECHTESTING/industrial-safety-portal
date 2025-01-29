@@ -44,7 +44,7 @@ class Department(views.APIView):
             if status in [400]:
                 return Response({"status": status, "data": serializer.errors}, status=HTTP_400_BAD_REQUEST)
             account_query.DepartmentRepository().add_department(serializer.data['name'])
-            return Response({"status": status, "data": serializer.data}, status=HTTP_200_OK)
+            return Response(serializer.data, status=HTTP_200_OK)
         except Exception as e:
             return Response({"status": status, "data": str(e)}, HTTP_400_BAD_REQUEST)
 

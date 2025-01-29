@@ -12,7 +12,7 @@ from account import permissions as account_permissions
 class EquipmentTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
 
-    queryset = equipment_models.Equipment.objects.all()
+    queryset = equipment_models.EquipmentType.objects.all()
     serializer_class = equipment_serializers.EquipmentTypeSerializer
 
     @swagger_auto_schema(
@@ -260,62 +260,6 @@ class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         pass
 
-class CheckListView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsAdmin|account_permissions.IsSuperAdmin|account_permissions.IsPortalAdmin]
-
-    parser_classes = [MultiPartParser]
-    queryset = equipment_models.CheckList.objects.all()
-    serializer_class = equipment_serializers.CheckListSerializer
-
-    @swagger_auto_schema(
-        tags=['CheckList'],
-        operation_summary="List and create checklists",
-        operation_description="Retrieve a list of checklists or create a new checklist."
-    )
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        tags=['CheckList'],
-        operation_summary="Create a checklist",
-        operation_description="Create a new checklist."
-    )
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
-
-
-class CheckListDetailsView(generics.RetrieveUpdateDestroyAPIView):
-    parser_classes = [MultiPartParser]
-    queryset = equipment_models.CheckList.objects.all()
-    serializer_class = equipment_serializers.CheckListSerializer
-
-    @swagger_auto_schema(
-        tags=['CheckList'],
-        operation_summary="Retrieve a checklist",
-        operation_description="Get a checklist by its ID."
-    )
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        tags=['CheckList'],
-        operation_summary="Update a checklist",
-        operation_description="Update an existing checklist by its ID."
-    )
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        tags=['CheckList'],
-        operation_summary="Delete a checklist",
-        operation_description="Delete a checklist by its ID."
-    )
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-    @swagger_auto_schema(auto_schema=None)
-    def put(self, request, *args, **kwargs):
-        pass
 
 class ScheduleView(generics.ListCreateAPIView):
     serializer_class = equipment_serializers.ScheduleSerializer

@@ -5,18 +5,22 @@ from shared import models as shared_models
 class Plant(shared_models.TimeStamp):
     name = models.CharField(max_length=64)
 
+    def __str__(self):
+       return self.name
+
 class Line(shared_models.TimeStamp):
     name = models.CharField(max_length=64)
     plant = models.ForeignKey(Plant,on_delete=models.SET_NULL,null=True,related_name="line")
-    department = models.ForeignKey('account.Department',on_delete=models.SET_NULL,null=True,related_name="line")
 
+    def __str__(self):
+       return self.name
 
 class Station(shared_models.TimeStamp):
     name = models.CharField(max_length=64)
     plant = models.ForeignKey(Plant,on_delete=models.SET_NULL,null=True,related_name="station")
-    department = models.ForeignKey('account.Department',on_delete=models.SET_NULL,null=True,related_name="station")
     line = models.ForeignKey(Line,on_delete=models.SET_NULL,null=True,related_name="station")
 
+   
 class EquipmentType(shared_models.TimeStamp):
     name = models.CharField(max_length=64)    
 
@@ -24,20 +28,12 @@ class Equipment(shared_models.TimeStamp):
     name = models.CharField(max_length=64)
     equipment_type = models.ForeignKey(EquipmentType,on_delete=models.SET_NULL,null=True)
     plant = models.ForeignKey(Plant,on_delete=models.SET_NULL,null=True,related_name="equipment")
-    department = models.ForeignKey('account.Department',on_delete=models.SET_NULL,null=True,related_name="equipment")
+    # department = models.ForeignKey('account.Department',on_delete=models.SET_NULL,null=True,related_name="equipment")
     line = models.ForeignKey(Line,on_delete=models.SET_NULL,null=True,related_name="equipment")
     station = models.ForeignKey(Station,on_delete=models.SET_NULL,null=True,related_name="equipment")
     qr = models.ImageField(upload_to='QR/',null=True,blank=True)
-    location = models.CharField(max_length=64)
+    sheet = models.CharField(max_length=64,null=True,blank=True)
 
-class CheckList(shared_models.TimeStamp):
-    name = models.CharField(max_length=64)
-    equipment = models.ForeignKey(Equipment,on_delete=models.SET_NULL,null=True)
-    plant = models.ForeignKey(Plant,on_delete=models.SET_NULL,null=True,related_name="checklist")
-    department = models.ForeignKey('account.Department',on_delete=models.SET_NULL,null=True,related_name="checklist")
-    line = models.ForeignKey(Line,on_delete=models.SET_NULL,null=True,related_name="checklist")
-    station = models.ForeignKey(Station,on_delete=models.SET_NULL,null=True,related_name="checklist")
-    image = models.ImageField(upload_to='checklist/',null=True,blank=True)
 
 class ScheduleType(shared_models.TimeStamp):
     name = models.CharField(max_length=64)

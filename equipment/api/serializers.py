@@ -36,7 +36,7 @@ class StationSerializer(serializers.ModelSerializer):
         return representation
 
 class EquipmentSerializer(serializers.ModelSerializer):
-    
+    audit_parameter = serializers.ListField(required=False)
     class Meta:
         model = equipment_models.Equipment
         fields = "__all__"
@@ -51,7 +51,10 @@ class EquipmentSerializer(serializers.ModelSerializer):
         return representation
    
   
-   
+    def create(self, validated_data):
+        # Remove check_point from validated_data
+        validated_data.pop('audit_parameter', None)
+        return super().create(validated_data)
         
 class ScheduleSerializer(serializers.ModelSerializer):
     plant = serializers.SerializerMethodField()
@@ -63,4 +66,15 @@ class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = equipment_models.Schedule
         fields = "__all__"  # Adjust this if needed
-        
+
+class MasterAuditParameterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = equipment_models.MasterAuditParameter
+        fields = ['id', 'name']
+
+class CheckPointSerializer(serializers.ModelSerializer):
+    audit_parameter = serializers.ListField(required=False)
+
+    class Meta:
+        model = equipment_models.Checkpoint
+        fields = "__all__"

@@ -1,6 +1,9 @@
 from django.urls import path
 from equipment.api import views as equipment_views
 urlpatterns = [
+    path("master-audit-parameter/",equipment_views.MasterAuditParameter.as_view(),name = 'master-audit-parameter'),
+    path("master-audit-parameter-details/<int:pk>/",equipment_views.MasterAuditParameterDetails.as_view(),name = 'master-audit-parameter-details'),
+    path("checkpoint/",equipment_views.CheckPointView.as_view(),name = 'checkpoint'),
     path("plant/",equipment_views.PlantView.as_view(),name = 'plant'),
     path("equipment-type/",equipment_views.EquipmentTypeView.as_view(),name = 'equipment-type'),
     path("equipment-type-details/<int:pk>/",equipment_views.EquipmentTypeDetailsView.as_view(),name = 'equipment-type-details'),

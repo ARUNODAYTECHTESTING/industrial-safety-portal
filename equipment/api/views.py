@@ -204,7 +204,7 @@ class StationDetailsView(generics.RetrieveUpdateDestroyAPIView):
 
 class EquipmentView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
-    parser_classes = [MultiPartParser]
+    # parser_classes = [MultiPartParser]
     queryset = equipment_models.Equipment.objects.all()
     serializer_class = equipment_serializers.EquipmentSerializer
 
@@ -222,7 +222,14 @@ class EquipmentView(generics.ListCreateAPIView):
         operation_description="Create new equipment."
     )
     def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+        payload = request.data
+        response = super().post(request, *args, **kwargs)
+        equipment = equipment_models.Equipment.objects.get(id=response.data['id'])
+        audit_parameters = equipment_models.MasterAuditParameter.objects.filter(name__in = payload.get('audit_parameter'))
+        if audit_parameters:
+            for audit_parameter in audit_parameters:
+                equipment_models.Checkpoint.objects.create(equipment=equipment,audit_parameter = audit_parameter)
+        return Response({"message": "Equipment created successfully"},status = status.HTTP_201_CREATED)
 
 
 class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
@@ -312,3 +319,92 @@ class ScheduleDetailsView(generics.RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(auto_schema=None)
     def put(self, request, *args, **kwargs):
         pass
+
+
+class MasterAuditParameter(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+    queryset = equipment_models.MasterAuditParameter.objects.all()
+    serializer_class = equipment_serializers.MasterAuditParameterSerializer
+
+    @swagger_auto_schema(
+        tags=['MasterAuditParameters'],
+        operation_summary="List and create Audit Parameters",
+        operation_description="Retrieve a list of Audit Parameters or create new Audit Parameters."
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['MasterAuditParameters'],
+        operation_summary="Create Audit Parameters",
+        operation_description="Create new Audit Parameters."
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class MasterAuditParameterDetails(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+    queryset = equipment_models.MasterAuditParameter.objects.all()
+    serializer_class = equipment_serializers.MasterAuditParameterSerializer
+
+    @swagger_auto_schema(
+        tags=['MasterAuditParameters'],
+        operation_summary="Retrieve Audit Parameters",
+        operation_description="Get Audit Parameters by its ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['MasterAuditParameters'],
+        operation_summary="Update Audit Parameters",
+        operation_description="Update an existing Audit Parameters by its ID."
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['MasterAuditParameters'],
+        operation_summary="Delete Audit Parameters",
+        operation_description="Delete Audit Parameters by its ID."
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    @swagger_auto_schema(auto_schema=None)
+    def put(self, request, *args, **kwargs):
+        pass
+
+
+
+class CheckPointView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+    # parser_classes = [MultiPartParser]
+    queryset = equipment_models.Checkpoint.objects.all()
+    serializer_class = equipment_serializers.CheckPointSerializer
+
+    @swagger_auto_schema(
+        tags=['checkpoint'],
+        operation_summary="List and create checkpoint",
+        operation_description="Retrieve a list of checkpoint or create new checkpoint."
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['checkpoint'],
+        operation_summary="Create checkpoint",
+        operation_description="Create new checkpoint."
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            audit_parameter = request.data.get('audit_parameter')
+            equipment = request.data.get('equipment')
+            audit_parameters = equipment_models.MasterAuditParameter.objects.filter(name__in = audit_parameter)
+            if audit_parameters:
+                for audit_parameter in audit_parameters:
+                    equipment_models.Checkpoint.objects.get_or_create(equipment_id=equipment,audit_parameter = audit_parameter)
+            return Response({"message": "Checkpoint created successfully"},status = status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": f"{e}"},status = status.HTTP_400_BAD_REQUEST)

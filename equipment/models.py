@@ -54,3 +54,18 @@ class Observation(shared_models.TimeStamp):
     name = models.CharField(max_length=64)
     equipment_type = models.ForeignKey(EquipmentType,on_delete=models.SET_NULL,null=True)
     image = models.ImageField(upload_to = 'observation/',null=True,blank=True)
+
+
+class MasterAuditParameter(shared_models.TimeStamp):
+    name = models.CharField(max_length=64)
+
+
+
+    def __str__(self):
+        return self.name
+    
+class Checkpoint(shared_models.TimeStamp):
+    equipment = models.ForeignKey(Equipment,related_name='checkpoints',on_delete=models.CASCADE)
+    audit_parameter = models.ForeignKey(MasterAuditParameter,related_name='checkpoints',on_delete=models.CASCADE,null=True,blank=True)
+
+    

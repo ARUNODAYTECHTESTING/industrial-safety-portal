@@ -8,6 +8,10 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from account import permissions as account_permissions
+from rest_framework.views import APIView
+from equipment import query as equipment_query
+from account import query as account_query
+from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,HTTP_201_CREATED)
 
 class EquipmentTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
@@ -431,3 +435,18 @@ class ObservationApiView(generics.ListCreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
+
+class ListPlantUserTypeDepartmentView(APIView):
+    @swagger_auto_schema(
+        tags=['ListPlantUserTypeDepartment'],
+        operation_summary="List all plant department and users type",
+        operation_description="List all plant department and users type"
+    )
+    def get(self, request, *args, **kwargs):
+        try:
+            plant = equipment_query.PlantQuery().get_all_plants().values("id","name")
+            department = account_query.DepartmentRepository().get_all_departments().values("id","name")
+            user_typt = account_query.GroupQuery().get_user_type_level(user=request.user)
+            return Response({"status":200,"data":{"plant":plant,"department": department,"user_typt": user_typt}},status=HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

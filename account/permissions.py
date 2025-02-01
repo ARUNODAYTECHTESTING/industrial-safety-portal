@@ -18,4 +18,4 @@ class IsAdmin(BasePermission):
 
 class IsAuditor(BasePermission):
     def has_permission(self, request, view):
-        return request.user.groups.filter(name='Users/Auditors').exists()
+        return request.user.groups.filter(name='Auditor').exists()

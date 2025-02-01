@@ -13,3 +13,4 @@ admin.site.register(equipment_models.MasterAuditParameter)
 admin.site.register(equipment_models.Checkpoint)
 
 
+

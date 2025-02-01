@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import views, generics
 from account import query as account_query
 from rest_framework.response import Response
-from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST)
+from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,HTTP_201_CREATED)
 from shared import serializers as shared_serializers
 from account.api import serializers as account_api_serializers
 from account import models as account_models
@@ -84,6 +84,8 @@ class DepartmentDetailView(generics.RetrieveUpdateDestroyAPIView):
         pass
  
 class GroupView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     queryset = Group.objects.all()
     serializer_class = account_api_serializers.GroupSerializer
     
@@ -101,15 +103,7 @@ class GroupView(generics.ListAPIView):
         elif user is Admin:
             return Auditor
         '''
-        
-        user_type = None
-        if request.user.groups.filter().first().name == 'Portal Admin':
-            user_type = Group.objects.filter(name__in = ['Super Admin', 'Admin', 'Auditor']).values("id","name")
-        elif request.user.groups.filter().first().name == 'Super Admin':
-            user_type = Group.objects.filter(name__in = ['Admin', 'Auditor']).values("id","name")
-        elif request.user.groups.filter().first().name == 'Admin':
-            user_type = Group.objects.filter(name__in = ['Auditor']).values("id","name")
-        
+        user_type = account_query.GroupQuery().get_user_type_level(request.user)        
         return Response({"status": "200", "data": user_type}, status=HTTP_200_OK)
 
     
@@ -129,7 +123,7 @@ class RegisterView(views.APIView):
             if status in [400]:
                 return Response({"status": status, 'data': serializer.errors}, status=HTTP_400_BAD_REQUEST)
             serializer.save(manage_by = self.request.user)
-            return Response({"status": status, 'data': "Registration Successfull"}, status=HTTP_200_OK)
+            return Response({"status": status, 'data': "Registration Successfull"}, status=HTTP_201_CREATED)
         except Exception as e:
             return Response({"status": status, 'data': str(e)}, status=HTTP_400_BAD_REQUEST)
 
@@ -152,7 +146,9 @@ class LoginView(views.APIView):
                 return Response({"status":400,"data":"Invalid credentials"},status=HTTP_400_BAD_REQUEST)
             
             token = account_query.TokenQuery().generate_token(user = user)
-            return Response({"status": status, 'data': {'token':token}}, status=HTTP_200_OK)
+            user_type = account_query.GroupQuery().get_user_type_level(user)
+            role = account_query.GroupQuery().get_user_role(user)        
+            return Response({"status": status, 'data': {'token':token,"role":role,"user_type":user_type}}, status=HTTP_200_OK)
         except Exception as e:
             return Response({"status": 400, 'data': str(e)}, status=HTTP_400_BAD_REQUEST)
 

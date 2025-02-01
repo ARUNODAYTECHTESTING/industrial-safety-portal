@@ -50,11 +50,6 @@ class Schedule(shared_models.TimeStamp):
     schedule_date = models.DateTimeField()
 
 
-class Observation(shared_models.TimeStamp):
-    name = models.CharField(max_length=64)
-    equipment_type = models.ForeignKey(EquipmentType,on_delete=models.SET_NULL,null=True)
-    image = models.ImageField(upload_to = 'observation/',null=True,blank=True)
-
 
 class MasterAuditParameter(shared_models.TimeStamp):
     name = models.CharField(max_length=64)
@@ -68,4 +63,9 @@ class Checkpoint(shared_models.TimeStamp):
     equipment = models.ForeignKey(Equipment,related_name='checkpoints',on_delete=models.CASCADE)
     audit_parameter = models.ForeignKey(MasterAuditParameter,related_name='checkpoints',on_delete=models.CASCADE,null=True,blank=True)
 
-    
+
+class Observation(shared_models.TimeStamp):
+    name = models.CharField(max_length=64)
+    checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE,null=True,blank=True)
+    image = models.ImageField(upload_to = 'observation/',null=True,blank=True)
+

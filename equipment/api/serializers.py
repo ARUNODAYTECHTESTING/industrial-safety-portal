@@ -73,8 +73,16 @@ class MasterAuditParameterSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class CheckPointSerializer(serializers.ModelSerializer):
-    audit_parameter = serializers.ListField(required=False)
+    audit_parameter = serializers.ListField(required=False,write_only=True)
 
     class Meta:
         model = equipment_models.Checkpoint
+        fields = "__all__"
+
+
+
+class ObservationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = equipment_models.Observation
         fields = "__all__"

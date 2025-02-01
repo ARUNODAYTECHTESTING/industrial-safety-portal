@@ -225,7 +225,7 @@ class EquipmentView(generics.ListCreateAPIView):
         payload = request.data
         response = super().post(request, *args, **kwargs)
         equipment = equipment_models.Equipment.objects.get(id=response.data['id'])
-        audit_parameters = equipment_models.MasterAuditParameter.objects.filter(name__in = payload.get('audit_parameter'))
+        audit_parameters = equipment_models.MasterAuditParameter.objects.filter(id__in = payload.get('audit_parameter'))
         if audit_parameters:
             for audit_parameter in audit_parameters:
                 equipment_models.Checkpoint.objects.create(equipment=equipment,audit_parameter = audit_parameter)
@@ -235,7 +235,7 @@ class EquipmentView(generics.ListCreateAPIView):
 class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
 
-    parser_classes = [MultiPartParser]
+    # parser_classes = [MultiPartParser]
     queryset = equipment_models.Equipment.objects.all()
     serializer_class = equipment_serializers.EquipmentSerializer
 
@@ -401,10 +401,33 @@ class CheckPointView(generics.ListCreateAPIView):
         try:
             audit_parameter = request.data.get('audit_parameter')
             equipment = request.data.get('equipment')
-            audit_parameters = equipment_models.MasterAuditParameter.objects.filter(name__in = audit_parameter)
+            audit_parameters = equipment_models.MasterAuditParameter.objects.filter(id__in = audit_parameter)
             if audit_parameters:
                 for audit_parameter in audit_parameters:
                     equipment_models.Checkpoint.objects.get_or_create(equipment_id=equipment,audit_parameter = audit_parameter)
             return Response({"message": "Checkpoint created successfully"},status = status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": f"{e}"},status = status.HTTP_400_BAD_REQUEST)
+    
+
+class ObservationApiView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsAuditor]
+    parser_classes = [MultiPartParser]
+    queryset = equipment_models.Observation.objects.all()
+    serializer_class = equipment_serializers.ObservationSerializer
+
+    @swagger_auto_schema(
+        tags=['Observation'],
+        operation_summary="List and create observation",
+        operation_description="Retrieve a list of observation or create new observation."
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['Observation'],
+        operation_summary="Create observation",
+        operation_description="Create new observation."
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)

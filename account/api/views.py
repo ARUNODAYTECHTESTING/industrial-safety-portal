@@ -128,6 +128,20 @@ class RegisterView(views.APIView):
             return Response({"status": status, 'data': str(e)}, status=HTTP_400_BAD_REQUEST)
 
 
+
+class ListUserView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = account_models.User.objects.all()
+    serializer_class = account_api_serializers.UserSerializer
+    @swagger_auto_schema(
+        tags=['User'],
+        operation_summary="List all users",
+        operation_description="Retrieve a list of users"
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    
 class LoginView(views.APIView):
     @swagger_auto_schema(
         tags=['User'],

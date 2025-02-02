@@ -26,9 +26,9 @@ class UserSerializer(serializers.ModelSerializer):
         
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['plant'] = instance.plant.name if instance.plant else None
-        representation["user_type"] = instance.groups.filter().first().name if instance.groups.filter().first() else None
-        representation["department"] = instance.department.name if instance.department else None
+        representation['plant'] = {"id":instance.plant.id,"name":instance.plant.name} if instance.plant else None
+        representation["user_type"] = {"id":instance.groups.filter().first().id,"name":instance.groups.filter().first().name} if instance.groups.filter().first() else None
+        representation["department"] = {"id":instance.department.id,"name":instance.department.name} if instance.department else None
 
         return representation
     

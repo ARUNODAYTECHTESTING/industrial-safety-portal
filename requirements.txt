@@ -20,3 +20,4 @@ swagger-spec-validator==3.0.4
 typing_extensions==4.12.2
 uritemplate==4.1.1
 gunicorn
+django-cors-headers 

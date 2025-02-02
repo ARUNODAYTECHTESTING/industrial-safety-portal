@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = account_models.User
         fields = ['id','name','password','user_type','department','plant','email','phone']
-    
+        
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['plant'] = instance.plant.name if instance.plant else None

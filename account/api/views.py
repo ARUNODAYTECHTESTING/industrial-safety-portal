@@ -141,7 +141,38 @@ class ListUserView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    
+class UserDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = account_models.User.objects.all()
+    serializer_class = account_api_serializers.UserSerializer
+    @swagger_auto_schema(
+        tags=['User'],
+        operation_summary="Retrieve a user",
+        operation_description="Get a user by its ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['User'],
+        operation_summary="Update a user",
+        operation_description="Update an existing user by its ID."
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['User'],
+        operation_summary="Delete a user",
+        operation_description="Delete a user by its ID."
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    @swagger_auto_schema(auto_schema=None)
+    def put(self, request, *args, **kwargs):
+        pass
+
 class LoginView(views.APIView):
     @swagger_auto_schema(
         tags=['User'],

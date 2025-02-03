@@ -11,6 +11,7 @@ class Command(BaseCommand):
     help = "Load dummy data into the database"
 
     def handle(self, *args, **kwargs):
+        self.create_dummy_departments()
         self.create_dummy_user_type()
         self.create_dummy_plant()
         self.create_dummy_line()
@@ -28,6 +29,12 @@ class Command(BaseCommand):
         file_path = os.path.join("shared/dummy", filename)
         with open(file_path, "r") as file:
             return json.load(file)
+        
+    def create_dummy_departments(self):
+        data = self.load_json_data("departments.json")
+        for item in data:
+            account_models.Department.objects.get_or_create(id=item["id"],name=item.get("name"))
+
 
     def create_dummy_user_type(self):
         data = self.load_json_data("user_types.json")

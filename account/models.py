@@ -11,7 +11,9 @@ import random
 class Department(shared_models.TimeStamp):
     name = models.CharField(max_length=64,unique=True)
 
-
+    def __str__(self):
+        return f"{self.id}-{self.name}"
+    
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_("email address"), unique=True)
     phone = models.CharField(max_length=16,null=True,blank=True)

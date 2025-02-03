@@ -1,0 +1,6 @@
+[
+    {"id": 1, "name": "Portal Admin"},
+    {"id": 2, "name": "Super Admin"},
+    {"id": 3, "name": "Admin"},
+    {"id": 4, "name": "Auditor"}
+]

@@ -20,9 +20,10 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     user_type = serializers.CharField(source = 'groups')
+    token_id = serializers.CharField(read_only = True)
     class Meta:
         model = account_models.User
-        fields = ['id','name','password','user_type','department','plant','email','phone']
+        fields = ['id','name','password','user_type','department','plant','email','phone','token_id']
         
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -37,7 +38,9 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data['password'] = account_utils.PasswordManager.hash_password(validated_data.pop('password'))
         return super().create(validated_data)
     
+    
 
+        
 class LoginSerializer(serializers.ModelSerializer):
     token_id = serializers.CharField()  # Define token_id manually without UniqueValidator
 

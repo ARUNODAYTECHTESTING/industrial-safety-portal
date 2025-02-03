@@ -20,6 +20,10 @@ class IUser(ABC):
     @abstractmethod
     def get_user_by_token_id(self,token_id: str):
         pass
+
+    @abstractmethod
+    def get_user_by_id(self,user_id: str):
+        pass
     
 class ITokenizer(ABC):
     @abstractmethod

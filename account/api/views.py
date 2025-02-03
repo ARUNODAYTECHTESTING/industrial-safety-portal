@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import views, generics
 from account import query as account_query
 from rest_framework.response import Response
-from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,HTTP_201_CREATED)
+from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,HTTP_201_CREATED,HTTP_403_FORBIDDEN,HTTP_404_NOT_FOUND)
 from shared import serializers as shared_serializers
 from account.api import serializers as account_api_serializers
 from account import models as account_models
@@ -142,7 +142,8 @@ class ListUserView(generics.ListAPIView):
         return super().get(request, *args, **kwargs)
 
 class UserDetailsView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsAdmin|account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+
     queryset = account_models.User.objects.all()
     serializer_class = account_api_serializers.UserSerializer
     @swagger_auto_schema(
@@ -159,6 +160,11 @@ class UserDetailsView(generics.RetrieveUpdateDestroyAPIView):
         operation_description="Update an existing user by its ID."
     )
     def patch(self, request, *args, **kwargs):
+        user_obj = account_query.UserQuery().get_user_by_id(kwargs.get('pk'))
+        if user_obj is None:
+            return Response({"status": 404, "data": "User not found"}, status=HTTP_404_NOT_FOUND)
+        if request.user !=user_obj.manage_by:
+            return Response({"status": 403, "data": "Unauthorized to update this user"}, status=HTTP_403_FORBIDDEN)
         return self.partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(

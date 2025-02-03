@@ -40,7 +40,9 @@ class EquipmentTypeView(generics.ListCreateAPIView):
         pass
 
 class EquipmentTypeDetailsView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = equipment_models.Equipment.objects.all()
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+
+    queryset = equipment_models.EquipmentType.objects.all()
     serializer_class = equipment_serializers.EquipmentTypeSerializer
 
     @swagger_auto_schema(

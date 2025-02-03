@@ -17,7 +17,8 @@ class UserQuery(account_interface.IUser):
     
     def get_user_by_token_id(self, token_id: str):
         return account_models.User.objects.filter(token_id=token_id).first()
-
+    def get_user_by_id(self, user_id: str):
+        return account_models.User.objects.filter(id=user_id).first()
 class TokenQuery(account_interface.ITokenizer):
 
     def generate_token(self,user:account_models.User) -> str:

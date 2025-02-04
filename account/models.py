@@ -15,9 +15,10 @@ class Department(shared_models.TimeStamp):
         return f"{self.id}-{self.name}"
   
     def save(self, *args, **kwargs):
-        obj = Department.objects.filter().last()
-        if obj:
-            self.id = obj.id + 1
+        if self.pk is None:
+            obj = Department.objects.filter().last()
+            if obj:
+                self.id = obj.id + 1
         super().save(*args, **kwargs)
     
 class User(AbstractBaseUser, PermissionsMixin):

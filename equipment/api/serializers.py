@@ -50,15 +50,19 @@ class EquipmentSerializer(serializers.ModelSerializer):
         representation['station'] = {'id':station_serializer.get('id'),'name':station_serializer.get('name')}
         return representation
    
-  
+    
     def create(self, validated_data):
+        validated_data.pop('audit_parameter', None)
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
         # Remove keys from validated_data if their value is None or 'null'
         for field in ['equipment_type', 'line', 'plant', 'station']:
             if validated_data.get(field) in [None, 'null']:
                 validated_data.pop(field, None)
-        validated_data.pop('audit_parameter', None)
-        return super().create(validated_data)
         
+        instance.save()
+        return instance
 class ScheduleSerializer(serializers.ModelSerializer):
     plant = serializers.SerializerMethodField()
     department= serializers.SerializerMethodField()

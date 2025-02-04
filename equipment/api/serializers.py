@@ -105,6 +105,12 @@ class CheckPointSerializer(serializers.ModelSerializer):
 
         return representation
 
+
+class CheckPointUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = equipment_models.Checkpoint
+        fields = "__all__"
 class ObservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = equipment_models.Observation

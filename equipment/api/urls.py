@@ -4,6 +4,7 @@ urlpatterns = [
     path("master-audit-parameter/",equipment_views.MasterAuditParameter.as_view(),name = 'master-audit-parameter'),
     path("master-audit-parameter-details/<int:pk>/",equipment_views.MasterAuditParameterDetails.as_view(),name = 'master-audit-parameter-details'),
     path("checkpoint/",equipment_views.CheckPointView.as_view(),name = 'checkpoint'),
+    path("checkpoint-details/<int:pk>/",equipment_views.CheckPointDetailsView.as_view(),name = 'checkpoint-details'),
     path("plant/",equipment_views.PlantView.as_view(),name = 'plant'),
     path("plant-details/<int:pk>/",equipment_views.PlantDetailsView.as_view(),name = 'plant-details'),
     path("observation/",equipment_views.ObservationApiView.as_view(),name = 'observation'),

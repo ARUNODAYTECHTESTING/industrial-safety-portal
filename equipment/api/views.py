@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from equipment import query as equipment_query
 from account import query as account_query
 from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,HTTP_201_CREATED)
+from drf_yasg import openapi
 
 class EquipmentTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
@@ -423,9 +424,20 @@ class CheckPointView(generics.ListCreateAPIView):
     @swagger_auto_schema(
         tags=['checkpoint'],
         operation_summary="List and create checkpoint",
-        operation_description="Retrieve a list of checkpoint or create new checkpoint."
+        operation_description="Retrieve a list of checkpoint or create new checkpoint.",
+        manual_parameters=[
+        openapi.Parameter(
+            name='equipment',
+            in_='query',
+            description='Equipment ID',
+            type=openapi.TYPE_INTEGER
+        )
+    ]
     )
     def get(self, request, *args, **kwargs):
+        equipment_id = request.query_params.get('equipment')
+        if equipment_id:
+            self.queryset = self.queryset.filter(equipment_id=equipment_id)
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -448,6 +460,34 @@ class CheckPointView(generics.ListCreateAPIView):
         except Exception as e:
             return Response({"error": f"{e}"},status = status.HTTP_400_BAD_REQUEST)
     
+class CheckPointDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+    queryset = equipment_models.Checkpoint.objects.all()
+    serializer_class = equipment_serializers.CheckPointUpdateSerializer
+
+    @swagger_auto_schema(
+        tags=['checkpoint'],
+        operation_summary="Retrieve checkpoint",
+        operation_description="Get checkpoint by its ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['checkpoint'],
+        operation_summary="Update checkpoint",
+        operation_description="Update an existing checkpoint by its ID."
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['checkpoint'],
+        operation_summary="Delete checkpoint",
+        operation_description="Delete checkpoint by its ID."
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 class ObservationApiView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]

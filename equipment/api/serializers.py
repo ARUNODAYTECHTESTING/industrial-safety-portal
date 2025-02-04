@@ -94,10 +94,24 @@ class CheckPointSerializer(serializers.ModelSerializer):
         model = equipment_models.Checkpoint
         fields = "__all__"
 
-
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['audit_parameter'] = PlantSerializer(instance.audit_parameter).data
+        return representation
 
 class ObservationSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = equipment_models.Observation
         fields = "__all__"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        
+        # Serialize the checkpoint and keep only 'id' and 'name'
+        checkpoint_data = CheckPointSerializer(instance.checkpoint).data
+        representation['checkpoint'] = {
+            "id": checkpoint_data.get("id"),
+            "name": checkpoint_data.get("name"),
+        }
+        
+        return representation

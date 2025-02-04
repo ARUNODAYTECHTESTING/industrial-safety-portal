@@ -447,7 +447,7 @@ class CheckPointView(generics.ListCreateAPIView):
     
 
 class ObservationApiView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsAuditor]
+    permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser]
     queryset = equipment_models.Observation.objects.all()
     serializer_class = equipment_serializers.ObservationSerializer
@@ -467,6 +467,38 @@ class ObservationApiView(generics.ListCreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
+
+class ObservationDetailsApiView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser]
+    queryset = equipment_models.Observation.objects.all()
+    serializer_class = equipment_serializers.ObservationSerializer
+
+    @swagger_auto_schema(
+        tags=['Observation'],
+        operation_summary="Retrieve observation",
+        operation_description="Get observation by its ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['Observation'],
+        operation_summary="Update observation",
+        operation_description="Update an existing observation by its ID."
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['Observation'],
+        operation_summary="Delete observation",
+        operation_description="Delete observation by its ID."
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
 
 class ListPlantUserTypeDepartmentView(APIView):
     @swagger_auto_schema(

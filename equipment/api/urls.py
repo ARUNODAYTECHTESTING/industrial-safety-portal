@@ -7,6 +7,7 @@ urlpatterns = [
     path("plant/",equipment_views.PlantView.as_view(),name = 'plant'),
     path("plant-details/<int:pk>/",equipment_views.PlantDetailsView.as_view(),name = 'plant-details'),
     path("observation/",equipment_views.ObservationApiView.as_view(),name = 'observation'),
+    path("observation-details/<int:pk>/",equipment_views.ObservationDetailsApiView.as_view(),name = 'observation-details'),
     path("equipment-type/",equipment_views.EquipmentTypeView.as_view(),name = 'equipment-type'),
     path("equipment-type-details/<int:pk>/",equipment_views.EquipmentTypeDetailsView.as_view(),name = 'equipment-type-details'),
     path("line/",equipment_views.LineView.as_view(),name = 'line'),

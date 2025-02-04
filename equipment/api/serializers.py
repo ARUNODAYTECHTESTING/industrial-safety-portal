@@ -56,10 +56,18 @@ class EquipmentSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
     
     def update(self, instance, validated_data):
-        # Remove keys from validated_data if their value is None or 'null'
+        # For PATCH requests, only update fields that are explicitly provided
         for field in ['equipment_type', 'line', 'plant', 'station']:
-            if validated_data.get(field) in [None, 'null']:
-                validated_data.pop(field, None)
+            # Only process the field if it's included in the request
+            if field in validated_data:
+                # If included but null/empty, skip it
+                if validated_data[field] not in [None, 'null', '']:
+                    setattr(instance, field, validated_data[field])
+        
+        # Update other fields that were provided
+        for attr, value in validated_data.items():
+            if attr not in ['equipment_type', 'line', 'plant', 'station', 'audit_parameter']:
+                setattr(instance, attr, value)
         
         instance.save()
         return instance

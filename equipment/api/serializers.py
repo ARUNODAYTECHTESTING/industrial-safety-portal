@@ -54,13 +54,13 @@ class EquipmentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Remove check_point from validated_data
         if validated_data.get('equipment_type') in [None,'null']:
-            validated_data.get('equipment_type')
+            del validated_data.get('equipment_type')
         if validated_data.get('line') in [None,'null']:
-            validated_data.get('line')
+            del validated_data.get('line')
         if validated_data.get('plant') in [None,'null']:
-            validated_data.get('plant')
+            del validated_data.get('plant')
         if validated_data.get('station') in [None,'null']:
-            validated_data.get('station')
+            del validated_data.get('station')
         validated_data.pop('audit_parameter', None)
         return super().create(validated_data)
         

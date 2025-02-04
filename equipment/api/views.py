@@ -95,7 +95,37 @@ class PlantView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
-    
+class PlantDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+    queryset = equipment_models.Plant.objects.all()
+    serializer_class = equipment_serializers.PlantSerializer
+    @swagger_auto_schema(
+        tags=['Plant'],
+        operation_summary="Retrieve a plant",
+        operation_description="Get a plant by its ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['Plant'],
+        operation_summary="Update a plant",
+        operation_description="Update an existing plant by its ID."
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['Plant'],
+        operation_summary="Delete a plant",
+        operation_description="Delete a plant by its ID."
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    @swagger_auto_schema(auto_schema=None)
+    def put(self, request, *args, **kwargs):
+        pass
 
 class LineView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]

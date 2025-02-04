@@ -9,9 +9,10 @@ class Plant(shared_models.TimeStamp):
        return self.name
     
     def save(self, *args, **kwargs):
-        obj = Plant.objects.filter().last()
-        if obj:
-            self.id = obj.id + 1
+        if self.pk is None:
+            obj = Plant.objects.filter().last()
+            if obj:
+                self.id = obj.id + 1
         super().save(*args, **kwargs)
 
 

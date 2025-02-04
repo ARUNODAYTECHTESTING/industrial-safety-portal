@@ -160,11 +160,11 @@ class UserDetailsView(generics.RetrieveUpdateDestroyAPIView):
         operation_description="Update an existing user by its ID."
     )
     def patch(self, request, *args, **kwargs):
-        user_obj = account_query.UserQuery().get_user_by_id(kwargs.get('pk'))
-        if user_obj is None:
-            return Response({"status": 404, "data": "User not found"}, status=HTTP_404_NOT_FOUND)
-        if request.user !=user_obj.manage_by:
-            return Response({"status": 403, "data": "Unauthorized to update this user"}, status=HTTP_403_FORBIDDEN)
+    #     user_obj = account_query.UserQuery().get_user_by_id(kwargs.get('pk'))
+    #     if user_obj is None:
+    #         return Response({"status": 404, "data": "User not found"}, status=HTTP_404_NOT_FOUND)
+    #     if request.user !=user_obj.manage_by:
+    #         return Response({"status": 403, "data": "Unauthorized to update this user"}, status=HTTP_403_FORBIDDEN)
         return self.partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(

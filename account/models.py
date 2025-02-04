@@ -13,6 +13,12 @@ class Department(shared_models.TimeStamp):
 
     def __str__(self):
         return f"{self.id}-{self.name}"
+  
+    def save(self, *args, **kwargs):
+        obj = Department.objects.filter().last()
+        if obj:
+            self.id = obj.id + 1
+        super().save(*args, **kwargs)
     
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_("email address"), unique=True)
@@ -57,6 +63,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         ]
 
     def save(self, *args, **kwargs):
+        # obj = User.objects.filter().last()
+        # if obj:
+        #     self.id = obj.id + 1
         if not self.token_id:
             self.token_id = random.randint(100000, 999999)
         super().save(*args, **kwargs)

@@ -436,11 +436,14 @@ class CheckPointView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         try:
             audit_parameter = request.data.get('audit_parameter')
-            equipment = request.data.get('equipment')
+            equipment_id = request.data.get('equipment')
+            equipment = equipment_models.Equipment.objects.filter(id=equipment_id).first()
+            if not equipment:
+                return Response({"error": "Equipment not found"},status = status.HTTP_404_NOT_FOUND)
             audit_parameters = equipment_models.MasterAuditParameter.objects.filter(id__in = audit_parameter)
             if audit_parameters:
                 for audit_parameter in audit_parameters:
-                    equipment_models.Checkpoint.objects.get_or_create(equipment_id=equipment,audit_parameter = audit_parameter)
+                    equipment_models.Checkpoint.objects.get_or_create(equipment_id=equipment.id,audit_parameter = audit_parameter)
             return Response({"message": "Checkpoint created successfully"},status = status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": f"{e}"},status = status.HTTP_400_BAD_REQUEST)

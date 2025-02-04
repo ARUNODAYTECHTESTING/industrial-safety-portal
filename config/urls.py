@@ -26,7 +26,7 @@ if not settings.DEBUG:
             title="OCR API",
             default_version='v1',
         ),
-        url='http://localhost/',
+        url='http://3.110.183.233/',
         public=True,
         permission_classes=(permissions.AllowAny,),
     )

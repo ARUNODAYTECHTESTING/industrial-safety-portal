@@ -96,7 +96,7 @@ class CheckPointSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['audit_parameter'] = PlantSerializer(instance.audit_parameter).data
+        representation['audit_parameter'] = MasterAuditParameterSerializer(instance.audit_parameter).data
         return representation
 
 class ObservationSerializer(serializers.ModelSerializer):

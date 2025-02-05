@@ -112,16 +112,29 @@ class Command(BaseCommand):
             except Exception:
                 continue
 
+   
     def create_dummy_observation(self):
         data = self.load_json_data("observations.json")
         for item in data:
             try:
-                equipment_models.Observation.objects.get_or_create(
-                    id=item.get("id"), name=item.get("name"), checkpoint_id=item.get("checkpoint_id")
+                equipment_models.Observation.objects.create(
+                    name=item.get("name"),
+                    checkpoint_id=item.get("checkpoint"),  # Changed from checkpoint_id
+                    image=item.get("image"),  
+                    attempt=item.get("attempt"),
+                    category=item.get("category", ""), 
+                    corrective_remark=item.get("corrective_remark", ""),
+                    owner_id=item.get("owner"),  
+                    department_id=item.get("department"),  
+                    plant_id=item.get("plant"),  
+                    remark=item.get("remark", ""),  
+                    request_status=item.get("request_status", "pending"),  
+                    approve_status=item.get("approve_status", "pending"), 
+                    target_date=parse_date(item.get("target_date"))
                 )
-            except Exception:
+            except Exception as e:
+                print(f"Error creating observation: {e}")
                 continue
-
     def dump_dummy_users_into_database(self):
         data = self.load_json_data("users.json")
         for item in data:

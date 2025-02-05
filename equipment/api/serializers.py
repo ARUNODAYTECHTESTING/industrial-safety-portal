@@ -137,9 +137,10 @@ class ObservationSerializer(serializers.ModelSerializer):
         
         # Serialize the checkpoint and keep only 'id' and 'name'
         checkpoint_data = CheckPointSerializer(instance.checkpoint).data
-        representation['checkpoint'] = {
-            "id": checkpoint_data.get("id"),
-            "name": checkpoint_data.get("name"),
-        }
-        
+        representation['checkpoint'] =  checkpoint_data.get("audit_parameter"),
+        owner_data = account_api_serializers.UserSerializer(instance.owner).data
+        representation['owner'] = {"id": owner_data.get("id"),"name": owner_data.get("name")}
+        department_serializer =account_api_serializers.DepartmentSerializer(instance.department).data
+        representation['department'] = {'id':department_serializer.get('id'),'name':department_serializer.get('name')}
+        representation['plant'] = PlantSerializer(instance.plant).data
         return representation

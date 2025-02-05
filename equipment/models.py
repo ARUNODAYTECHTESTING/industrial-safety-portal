@@ -131,7 +131,7 @@ class Checkpoint(shared_models.TimeStamp):
     audit_parameter = models.ForeignKey(MasterAuditParameter,related_name='checkpoints',on_delete=models.CASCADE,null=True,blank=True)
 
     def __str__(self):
-        return self.equipment
+        return self.equipment.name
 
     def save(self, *args, **kwargs):
         if self.pk is None:
@@ -153,20 +153,19 @@ class Observation(shared_models.TimeStamp):
         ('rejected', 'Rejected'),
     )
     name = models.CharField(max_length=64)
-    checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE,null=True,blank=True)
+    checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE)
     image = models.ImageField(upload_to = 'observation/',null=True,blank=True)
     attempt = models.PositiveBigIntegerField()
     category = models.CharField(max_length=64,null=True,blank=True)
     corrective_remark = models.CharField(max_length=64,null=True,blank=True)
     owner = models.ForeignKey("account.User",related_name="observations",on_delete=models.CASCADE)
     department = models.ForeignKey("account.Department",related_name="observations",on_delete=models.CASCADE)
-    Plant = models.ForeignKey(Plant,related_name="observations",on_delete=models.CASCADE)
+    plant = models.ForeignKey(Plant,related_name="observations",on_delete=models.CASCADE)
     remark = models.CharField(max_length=64,null=True,blank=True)
     request_status = models.CharField(max_length=10, choices=REQUEST_STATUS_COICE, default='pending')
     approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICE,default='pending')
     target_date = models.DateField()
-    def __str__(self):
-        return self.name
+
 
     def save(self, *args, **kwargs):
         if self.pk is None:

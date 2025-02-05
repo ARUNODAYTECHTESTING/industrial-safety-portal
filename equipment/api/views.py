@@ -316,6 +316,9 @@ class ScheduleView(generics.ListCreateAPIView):
         operation_description="Retrieve a list of schedules or create a new schedule."
     )
     def get(self, request, *args, **kwargs):
+        group_names = request.user.groups.values_list('name', flat=True)
+        if set(group_names).intersection({"Auditor", "Auditors"}):
+            self.queryset = self.queryset.filter(user=request.user)
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(

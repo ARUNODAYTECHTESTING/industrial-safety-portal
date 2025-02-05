@@ -102,7 +102,7 @@ class Schedule(shared_models.TimeStamp):
     line = models.ForeignKey(Line,on_delete=models.CASCADE,related_name="schedule")
     station = models.ForeignKey(Station,on_delete=models.CASCADE,related_name="schedule")
     schedule_type = models.ForeignKey(ScheduleType,on_delete=models.CASCADE,related_name="schedule")
-    schedule_date = models.DateField()
+    schedule_date = models.DateField(null=True,blank=True)
 
     def save(self, *args, **kwargs):
         if self.pk is None:

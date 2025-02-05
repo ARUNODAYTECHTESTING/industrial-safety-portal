@@ -305,6 +305,35 @@ class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 
+
+class ScheduleTypeView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = equipment_serializers.ScheduleTypeSerializer
+    queryset = equipment_models.ScheduleType.objects.all()
+
+    @swagger_auto_schema(
+        tags=['Equipment'],
+        operation_summary="List and create equipment",
+        operation_description="Retrieve a list of equipment or create new equipment."
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['Equipment'],
+        operation_summary="Create equipment",
+        operation_description="Create new equipment."
+    )
+    def post(self, request, *args, **kwargs):
+        payload = request.data
+        response = super().post(request, *args, **kwargs)
+        equipment = equipment_models.Equipment.objects.get(id=response.data['id'])
+        audit_parameters = equipment_models.MasterAuditParameter.objects.filter(id__in = payload.get('audit_parameter'))
+        if audit_parameters:
+            for audit_parameter in audit_parameters:
+                equipment_models.Checkpoint.objects.create(equipment=equipment,audit_parameter = audit_parameter)
+        return Response({"message": "Equipment created successfully"},status = status.HTTP_201_CREATED)
+
 class ScheduleView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = equipment_serializers.ScheduleSerializer

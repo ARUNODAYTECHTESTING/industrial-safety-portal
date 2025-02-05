@@ -71,16 +71,32 @@ class EquipmentSerializer(serializers.ModelSerializer):
         
         instance.save()
         return instance
+    
+
+class ScheduleTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = equipment_models.ScheduleType
+        fields = "__all__"
 class ScheduleSerializer(serializers.ModelSerializer):
-    plant = serializers.SerializerMethodField()
-    department= serializers.SerializerMethodField()
-    line = serializers.SerializerMethodField()
-    station = serializers.SerializerMethodField()
-    equipment_type = serializers.SerializerMethodField()
 
     class Meta:
         model = equipment_models.Schedule
         fields = "__all__"  # Adjust this if needed
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['plant'] = PlantSerializer(instance.plant).data
+        line_serializer = LineSerializer(instance.line).data
+        representation['line'] = {'id':line_serializer.get('id'),'name':line_serializer.get('name')}
+        representation['equipment_type'] = EquipmentTypeSerializer(instance.equipment_type).data
+        station_serializer =StationSerializer(instance.station).data
+        representation['station'] = {'id':station_serializer.get('id'),'name':station_serializer.get('name')}
+        department_serializer =account_api_serializers.DepartmentSerializer(instance.department).data
+        representation['department'] = {'id':department_serializer.get('id'),'name':department_serializer.get('name')}
+        shedule_serializer =ScheduleTypeSerializer(instance.schedule_type).data
+        representation['schedule_type'] = {'id':shedule_serializer.get('id'),'name':shedule_serializer.get('name')}
+        return representation
+   
 
 class MasterAuditParameterSerializer(serializers.ModelSerializer):
     class Meta:

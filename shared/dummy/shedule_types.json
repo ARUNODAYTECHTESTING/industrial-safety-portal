@@ -1,0 +1,10 @@
+[
+    {"id": 1, "name": "HOURLY"},
+    {"id": 2, "name": "DAILY"},
+    {"id": 3, "name": "WEEKLY"},
+    {"id": 4, "name": "FORTNIGHTLY"},
+    {"id": 5, "name": "MONTHLY"},
+    {"id": 6, "name": "QUARTERLY"},
+    {"id": 7, "name": "HALF-YEARLY"},
+    {"id": 8, "name": "YEARLY"}
+]

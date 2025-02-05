@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group
 from account import models as account_models
 from account import utils as account_utils
 from equipment import models as equipment_models
+from django.utils.dateparse import parse_date
 
 
 class Command(BaseCommand):
@@ -22,6 +23,8 @@ class Command(BaseCommand):
         self.create_dummy_checkpoint()
         self.create_dummy_observation()
         self.dump_dummy_users_into_database()
+        self.create_dummy_shedule_type()
+        self.create_dummy_shedule()
         self.stdout.write(self.style.SUCCESS("Dummy data loaded successfully!"))
 
     def load_json_data(self, filename):
@@ -135,3 +138,22 @@ class Command(BaseCommand):
                 user.save()
             except Exception:
                 continue
+    def create_dummy_shedule_type(self):
+        data = self.load_json_data("shedule_types.json")
+        for item in data:
+            equipment_models.ScheduleType.objects.get_or_create(id=item["id"],name=item.get("name"))
+    
+    def create_dummy_shedule(self):
+        data = self.load_json_data("shedules.json")
+        for item in data:
+           
+            equipment_models.Schedule.objects.get_or_create(
+                user_id=item["user"],
+                equipment_type_id=item["equipment_type"],
+                plant_id=item["plant"],
+                department_id=item["department"],
+                line_id=item["line"],
+                station_id=item["station"],
+                schedule_type_id=item["schedule_type"],
+                schedule_date=item["schedule_date"]
+            )

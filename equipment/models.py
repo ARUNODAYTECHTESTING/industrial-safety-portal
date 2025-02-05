@@ -70,7 +70,7 @@ class Equipment(shared_models.TimeStamp):
     line = models.ForeignKey(Line,on_delete=models.CASCADE,related_name="equipment")
     station = models.ForeignKey(Station,on_delete=models.CASCADE,related_name="equipment")
     qr = models.ImageField(upload_to='QR/',null=True,blank=True)
-    sheet = models.CharField(max_length=64,null=True,blank=True)
+    sheet = models.CharField(max_length=64)
 
     def __str__(self):
        return self.name

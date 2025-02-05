@@ -306,6 +306,7 @@ class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ScheduleView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = equipment_serializers.ScheduleSerializer
     queryset = equipment_models.Schedule.objects.all()
 
@@ -327,6 +328,7 @@ class ScheduleView(generics.ListCreateAPIView):
 
 
 class ScheduleDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = equipment_serializers.ScheduleSerializer
     queryset = equipment_models.Schedule.objects.all()
 

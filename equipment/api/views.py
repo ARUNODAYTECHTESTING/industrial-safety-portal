@@ -312,27 +312,49 @@ class ScheduleTypeView(generics.ListCreateAPIView):
     queryset = equipment_models.ScheduleType.objects.all()
 
     @swagger_auto_schema(
-        tags=['Equipment'],
-        operation_summary="List and create equipment",
-        operation_description="Retrieve a list of equipment or create new equipment."
+        tags=['Schedule'],
+        operation_summary="List and create schedule type",
+        operation_description="Retrieve a list of schedule type or create new equipment."
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        tags=['Equipment'],
-        operation_summary="Create equipment",
-        operation_description="Create new equipment."
+        tags=['Schedule'],
+        operation_summary="Create schedule type",
+        operation_description="Create new schedule type."
     )
     def post(self, request, *args, **kwargs):
-        payload = request.data
-        response = super().post(request, *args, **kwargs)
-        equipment = equipment_models.Equipment.objects.get(id=response.data['id'])
-        audit_parameters = equipment_models.MasterAuditParameter.objects.filter(id__in = payload.get('audit_parameter'))
-        if audit_parameters:
-            for audit_parameter in audit_parameters:
-                equipment_models.Checkpoint.objects.create(equipment=equipment,audit_parameter = audit_parameter)
-        return Response({"message": "Equipment created successfully"},status = status.HTTP_201_CREATED)
+        return super().post(request, *args, **kwargs)
+    
+class ScheduleTypeDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = equipment_serializers.ScheduleTypeSerializer
+    queryset = equipment_models.ScheduleType.objects.all()
+
+    @swagger_auto_schema(
+        tags=['Schedule'],
+        operation_summary="Retrieve a schedule",
+        operation_description="Get a schedule by its ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['Schedule'],
+        operation_summary="Update a schedule type",
+        operation_description="Update an existing schedule type by its ID."
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=['Schedule'],
+        operation_summary="Delete a schedule type",
+        operation_description="Delete a schedule type by its ID."
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 class ScheduleView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -19,5 +19,6 @@ urlpatterns = [
     path("equipment-details/<int:pk>/",equipment_views.EquipmentDetailsView.as_view(),name = 'equipment-details'),
     path("schedule/",equipment_views.ScheduleView.as_view(),name = 'schedule'),
     path("schedule-details/<int:pk>/",equipment_views.ScheduleDetailsView.as_view(),name = 'schedule-details'),
-    path("plant-user-type-department/",equipment_views.ListPlantUserTypeDepartmentView.as_view(),name = 'plant-user-type-department')
+    path("plant-user-type-department/",equipment_views.ListPlantUserTypeDepartmentView.as_view(),name = 'plant-user-type-department'),
+    path("filter-data/",equipment_views.FilterDataView.as_view(),name = 'filter-data')
 ]

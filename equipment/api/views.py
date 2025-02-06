@@ -13,7 +13,8 @@ from equipment import query as equipment_query
 from account import query as account_query
 from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,HTTP_201_CREATED)
 from drf_yasg import openapi
-
+from account import models as account_models
+from account.api import serializers as account_serializers
 class EquipmentTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
 
@@ -613,3 +614,61 @@ class ListPlantUserTypeDepartmentView(APIView):
             return Response({"status":200,"data":{"plant":plant,"department": department,"user_typt": user_typt}},status=HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class FilterDataView(generics.ListAPIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    queryset = None
+    serializer_class = None
+
+    @swagger_auto_schema(
+        operation_summary="List data associated objects",
+        manual_parameters=[
+            openapi.Parameter(
+                name='plant', 
+                in_='query',
+                description='Filter by plant ID',
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                name='line', 
+                in_='query',
+                description='Filter by line ID',
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                name='station', 
+                in_='query',
+                description='Filter by station ID',
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                name='department', 
+                in_='query',
+                description='Filter by department ID',
+                type=openapi.TYPE_INTEGER
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        plant = request.GET.get('plant', None)
+        line = request.GET.get('line', None)
+        station = request.GET.get('station', None)
+        department = request.GET.get('department', None)
+
+        if plant is not None:
+            self.queryset = equipment_models.Line.objects.filter(plant_id=plant)
+            self.serializer_class = equipment_serializers.LineSerializer
+        elif line is not None:
+            self.queryset = equipment_models.Station.objects.filter(line_id=line)
+            self.serializer_class = equipment_serializers.StationSerializer
+        elif station is not None:
+            self.queryset = equipment_models.Station.objects.filter(id=station)
+            self.serializer_class = equipment_serializers.StationSerializer
+        elif department is not None:
+            self.queryset = account_models.User.objects.filter(department_id=department)
+            self.serializer_class = account_serializers.UserSerializer
+        else:
+            return Response({"detail": "Please provide at least one filter parameter (plant, line, station, department)."})
+
+        # Call the parent class's get method
+        return super().get(request, *args, **kwargs)

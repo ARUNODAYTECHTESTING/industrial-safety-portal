@@ -21,6 +21,7 @@ urlpatterns = [
     path("schedule-details/<int:pk>/",equipment_views.ScheduleDetailsView.as_view(),name = 'schedule-details'),
     path("schedule-type/",equipment_views.ScheduleTypeView.as_view(),name = 'schedule-type'),
     path("schedule-type-details/<int:pk>/",equipment_views.ScheduleTypeDetailsView.as_view(),name = 'schedule-type-details'),
+    path("plant-user-type-department/",equipment_views.ListPlantUserTypeDepartmentView.as_view(),name = 'plant-user-type-department'),
+    path("filter-data/",equipment_views.FilterDataView.as_view(),name = 'filter-data')
 
-    path("plant-user-type-department/",equipment_views.ListPlantUserTypeDepartmentView.as_view(),name = 'plant-user-type-department')
 ]

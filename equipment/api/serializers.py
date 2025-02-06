@@ -95,6 +95,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
         representation['department'] = {'id':department_serializer.get('id'),'name':department_serializer.get('name')}
         shedule_serializer =ScheduleTypeSerializer(instance.schedule_type).data
         representation['schedule_type'] = {'id':shedule_serializer.get('id'),'name':shedule_serializer.get('name')}
+        representation['user'] = {"id":instance.user.id, 'name':instance.user.name}
         return representation
    
 

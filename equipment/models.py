@@ -96,7 +96,7 @@ class ScheduleType(shared_models.TimeStamp):
 
 class Schedule(shared_models.TimeStamp):
     user = models.ForeignKey('account.User',on_delete=models.CASCADE,related_name="schedule")
-    equipment_type = models.ForeignKey(EquipmentType,on_delete=models.CASCADE)
+    equipment = models.ForeignKey(Equipment,on_delete=models.CASCADE)
     plant = models.ForeignKey(Plant,on_delete=models.CASCADE,related_name="schedule")
     department = models.ForeignKey('account.Department',on_delete=models.CASCADE,related_name="schedule")
     line = models.ForeignKey(Line,on_delete=models.CASCADE,related_name="schedule")

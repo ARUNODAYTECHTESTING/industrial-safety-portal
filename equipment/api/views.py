@@ -252,6 +252,15 @@ class EquipmentView(generics.ListCreateAPIView):
         operation_description="Retrieve a list of equipment or create new equipment."
     )
     def get(self, request, *args, **kwargs):
+        group_names = request.user.groups.values_list('name', flat=True)
+        if set(group_names).intersection({"Auditor", "Auditors"}):
+            print("1--------------------------------")
+            equipments = equipment_query.ScheduleQuery().get_schedule_by_user(request.user)
+            if len(equipments) > 0:
+                print("3--------------------------------")
+                self.queryset = equipment_query.EquipmentQuery().get_equipment_by_id(equipments)
+                print("4--------------------------------")
+                
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(

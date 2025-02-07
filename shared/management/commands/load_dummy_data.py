@@ -162,7 +162,7 @@ class Command(BaseCommand):
            
             equipment_models.Schedule.objects.get_or_create(
                 user_id=item["user"],
-                equipment_type_id=item["equipment_type"],
+                equipment_id=item["equipment"],
                 plant_id=item["plant"],
                 department_id=item["department"],
                 line_id=item["line"],

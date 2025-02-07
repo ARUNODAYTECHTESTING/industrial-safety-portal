@@ -88,7 +88,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
         representation['plant'] = PlantSerializer(instance.plant).data
         line_serializer = LineSerializer(instance.line).data
         representation['line'] = {'id':line_serializer.get('id'),'name':line_serializer.get('name')}
-        representation['equipment_type'] = EquipmentTypeSerializer(instance.equipment_type).data
+        representation['equipment'] = EquipmentSerializer(instance.equipment).data
         station_serializer =StationSerializer(instance.station).data
         representation['station'] = {'id':station_serializer.get('id'),'name':station_serializer.get('name')}
         department_serializer =account_api_serializers.DepartmentSerializer(instance.department).data

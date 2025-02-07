@@ -1,5 +1,7 @@
-from django.urls import path
+from django.urls import path,include
 from equipment.api import views as equipment_views
+
+
 urlpatterns = [
     path("master-audit-parameter/",equipment_views.MasterAuditParameter.as_view(),name = 'master-audit-parameter'),
     path("master-audit-parameter-details/<int:pk>/",equipment_views.MasterAuditParameterDetails.as_view(),name = 'master-audit-parameter-details'),
@@ -22,6 +24,11 @@ urlpatterns = [
     path("schedule-type/",equipment_views.ScheduleTypeView.as_view(),name = 'schedule-type'),
     path("schedule-type-details/<int:pk>/",equipment_views.ScheduleTypeDetailsView.as_view(),name = 'schedule-type-details'),
     path("plant-user-type-department/",equipment_views.ListPlantUserTypeDepartmentView.as_view(),name = 'plant-user-type-department'),
-    path("filter-data/",equipment_views.FilterDataView.as_view(),name = 'filter-data')
+    path("filter-data/",equipment_views.FilterDataView.as_view(),name = 'filter-data'),
+    path("audit-summery/",equipment_views.AuditSummary.as_view(),name = 'audit-summery'),
+    path("auditor-summery/",equipment_views.AuditorAuditSummary.as_view(),name = 'auditor-summery'),
+
+
+
 
 ]

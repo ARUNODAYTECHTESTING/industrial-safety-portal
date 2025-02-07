@@ -146,6 +146,7 @@ class Observation(shared_models.TimeStamp):
     ('pending', 'Pending'),
     ('ongoing', 'Ongoing'),
     ('complete', 'Complete'),
+    ('failed', 'Failed'),
     )
     APPROVED_STATUS_COICE = (
         ('pending', 'Pending'),

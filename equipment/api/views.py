@@ -15,6 +15,14 @@ from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,HTTP_201_CR
 from drf_yasg import openapi
 from account import models as account_models
 from account.api import serializers as account_serializers
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Count, Q,Max
+
+from django.db.models import Count, Q, F, ExpressionWrapper, DecimalField
+from django.db.models.functions import Coalesce
 class EquipmentTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
 
@@ -625,7 +633,7 @@ class ListPlantUserTypeDepartmentView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class FilterDataView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = None
     serializer_class = None
 
@@ -681,3 +689,212 @@ class FilterDataView(generics.ListAPIView):
 
         # Call the parent class's get method
         return super().get(request, *args, **kwargs)
+
+
+
+
+
+
+
+class AuditSummary(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    queryset = equipment_models.Observation.objects.all()
+    serializer_class = equipment_serializers.ObservationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = [
+        'request_status', 
+        'approve_status'
+    ]
+
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Comprehensive Audit Overview",
+        operation_description="Retrieve detailed audit statistics including total audits, compliance score, and status breakdown"
+    )
+    def get(self, request, *args, **kwargs):
+        # Apply any filters from the request
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Total Audits Completed
+        total_audits = queryset.filter(request_status="complete").count()
+        
+        # Pending Audits
+        pending_audits = queryset.filter(request_status='pending').count()
+        
+        # Compliance Score Calculation
+        total_observations = queryset.count()
+        approved_observations = queryset.filter(approve_status='approved').count()
+        compliance_score = (approved_observations / total_observations * 100) if total_observations > 0 else 0
+        
+        # Detailed Status Breakdown
+        status_breakdown = {
+            'pending': queryset.filter(request_status='pending').count(),
+            'ongoing': queryset.filter(request_status='ongoing').count(),
+            'complete': queryset.filter(request_status='complete').count(),
+            'failed': queryset.filter(request_status='failed').count()
+        }
+        
+        # Pass vs Fail Breakdown
+        pass_fail_breakdown = {
+            'passed': queryset.filter(approve_status='approved').count(),
+            'rejected': queryset.filter(approve_status='rejected').count(),
+            'pending_review': queryset.filter(approve_status='pending').count()
+        }
+        
+        # Department-wise Audit Summary
+        # department_summary = list(queryset.values('department__name')\
+        #     .annotate(
+        #         total_audits=Count('id'),
+        #         passed_audits=Count('id', filter=Q(approve_status='approved')),
+        #         failed_audits=Count('id', filter=Q(approve_status='rejected'))
+        #     ))
+        
+        # # Plant-wise Audit Summary
+        # plant_summary = list(queryset.values('plant__name')\
+        #     .annotate(
+        #         total_audits=Count('id'),
+        #         passed_audits=Count('id', filter=Q(approve_status='approved')),
+        #         failed_audits=Count('id', filter=Q(approve_status='rejected'))
+        #     ))
+
+       
+        
+        return Response({
+            'summary_cards': {
+                'total_audits': total_audits,
+                'pending_audits': pending_audits,
+                'compliance_score': round(compliance_score, 2),
+                'pass_fail_ratio': pass_fail_breakdown
+            },
+            'status_breakdown': status_breakdown,
+           
+        })
+
+class AuditorAuditSummary(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    queryset = account_models.User.objects.filter(observations__isnull=False).distinct()
+    
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Comprehensive Auditor Performance Tracking",
+        operation_description="Detailed analytics of auditor performance including audit status breakdown and compliance scores"
+    )
+    def get(self, request, *args, **kwargs):
+        # Comprehensive Auditor Performance Tracking
+        auditor_performance = self.queryset.annotate(
+            # Audit Counts
+            total_audits=Count('observations', distinct=True),
+            completed_audits=Count('observations', filter=Q(observations__request_status='complete'), distinct=True),
+            pending_audits=Count('observations', filter=Q(observations__request_status='pending'), distinct=True),
+            ongoing_audits=Count('observations', filter=Q(observations__request_status='ongoing'), distinct=True),
+            failed_audits=Count('observations', filter=Q(observations__request_status='failed'), distinct=True),
+            
+            # Approval Status Counts
+            approved_audits=Count('observations', filter=Q(observations__approve_status='approved'), distinct=True),
+            rejected_audits=Count('observations', filter=Q(observations__approve_status='rejected'), distinct=True),
+            
+            # Audit Performance Metrics
+            compliance_score=ExpressionWrapper(
+                Coalesce(
+                    Count('observations', filter=Q(observations__approve_status='approved'), distinct=True) * 100.0 / 
+                    Coalesce(Count('observations', distinct=True), 1),
+                    0
+                ),
+                output_field=DecimalField(max_digits=5, decimal_places=2)
+            )
+        ).values(
+            'id', 
+            'name',
+            'email',
+            'total_audits',
+            'completed_audits',
+            'pending_audits',
+            'ongoing_audits',
+            'failed_audits',
+            'approved_audits',
+            'rejected_audits',
+            'compliance_score'
+        ).order_by('-total_audits')
+        
+        # Prepare Detailed Performance List
+        auditor_performance_list = []
+        # overall_performance_summary = {
+        #     'total_auditors': 0,
+        #     'total_audits': 0,
+        #     'average_compliance_score': 0,
+        #     'status_breakdown': {
+        #         'completed': 0,
+        #         'pending': 0,
+        #         'ongoing': 0,
+        #         'failed': 0
+        #     }
+        # }
+        
+        for auditor in auditor_performance:
+            # Calculate detailed performance metrics
+            auditor_data = {
+                'auditor_id': auditor['id'],
+                'name': auditor['name'],
+                'email': auditor['email'],
+                
+                # Audit Status Breakdown
+                'audit_status_breakdown': {
+                    'total': auditor['total_audits'],
+                    'completed': auditor['completed_audits'],
+                    'pending': auditor['pending_audits'],
+                    'ongoing': auditor['ongoing_audits'],
+                    'failed': auditor['failed_audits']
+                },
+                
+                # Approval Status Details
+                'approval_status': {
+                    'approved': auditor['approved_audits'],
+                    'rejected': auditor['rejected_audits']
+                },
+                
+                # Compliance Score
+                'compliance_score': float(auditor['compliance_score']),
+                
+                # Performance Indicators
+                'performance_indicators': {
+                    'approval_rate': round(
+                        (auditor['approved_audits'] / auditor['total_audits'] * 100) 
+                        if auditor['total_audits'] > 0 else 0, 
+                        2
+                    ),
+                    'rejection_rate': round(
+                        (auditor['rejected_audits'] / auditor['total_audits'] * 100) 
+                        if auditor['total_audits'] > 0 else 0, 
+                        2
+                    )
+                }
+            }
+            
+            # # Update Overall Performance Summary
+            # overall_performance_summary['total_auditors'] += 1
+            # overall_performance_summary['total_audits'] += auditor_data['audit_status_breakdown']['total']
+            # overall_performance_summary['average_compliance_score'] += auditor_data['compliance_score']
+            
+            # # Update Status Breakdown
+            # overall_performance_summary['status_breakdown']['completed'] += auditor_data['audit_status_breakdown']['completed']
+            # overall_performance_summary['status_breakdown']['pending'] += auditor_data['audit_status_breakdown']['pending']
+            # overall_performance_summary['status_breakdown']['ongoing'] += auditor_data['audit_status_breakdown']['ongoing']
+            # overall_performance_summary['status_breakdown']['failed'] += auditor_data['audit_status_breakdown']['failed']
+            
+            auditor_performance_list.append(auditor_data)
+        
+        # Calculate average compliance score
+        # if overall_performance_summary['total_auditors'] > 0:
+        #     overall_performance_summary['average_compliance_score'] = round(
+        #         overall_performance_summary['average_compliance_score'] / overall_performance_summary['total_auditors'], 
+        #         2
+        #     )
+        
+        return Response({
+            'auditors': auditor_performance_list,
+            # 'overall_performance_summary': overall_performance_summary
+        })
+    
+

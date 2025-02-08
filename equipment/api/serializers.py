@@ -35,21 +35,7 @@ class StationSerializer(serializers.ModelSerializer):
         representation['line'] = {'id':line_serializer.get('id'),'name':line_serializer.get('name')}
         return representation
 
-class EquipmentSerializer(serializers.ModelSerializer):
-    audit_parameter = serializers.ListField(required=False)
-    class Meta:
-        model = equipment_models.Equipment
-        fields = "__all__"
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['plant'] = PlantSerializer(instance.plant).data
-        line_serializer = LineSerializer(instance.line).data
-        representation['line'] = {'id':line_serializer.get('id'),'name':line_serializer.get('name')}
-        representation['equipment_type'] = EquipmentTypeSerializer(instance.equipment_type).data
-        station_serializer =StationSerializer(instance.station).data
-        representation['station'] = {'id':station_serializer.get('id'),'name':station_serializer.get('name')}
-        return representation
-   
+
     
     def create(self, validated_data):
         validated_data.pop('audit_parameter', None)
@@ -145,3 +131,25 @@ class ObservationSerializer(serializers.ModelSerializer):
         representation['department'] = {'id':department_serializer.get('id'),'name':department_serializer.get('name')}
         representation['plant'] = PlantSerializer(instance.plant).data
         return representation
+
+class EquipmentSerializer(serializers.ModelSerializer):
+    audit_parameter = serializers.ListField(required=False)
+    checkpoints = serializers.SerializerMethodField("get_checkpoints")
+
+    class Meta:
+        model = equipment_models.Equipment
+        fields = "__all__"
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['plant'] = PlantSerializer(instance.plant).data
+        line_serializer = LineSerializer(instance.line).data
+        representation['line'] = {'id':line_serializer.get('id'),'name':line_serializer.get('name')}
+        representation['equipment_type'] = EquipmentTypeSerializer(instance.equipment_type).data
+        station_serializer =StationSerializer(instance.station).data
+        representation['station'] = {'id':station_serializer.get('id'),'name':station_serializer.get('name')}
+
+        return representation
+    
+    def get_checkpoints(self, instance):
+        return instance.checkpoints.filter().values('audit_parameter__id','audit_parameter__name')
+        

@@ -6,14 +6,17 @@ from account import models as account_models
 from account import utils as account_utils
 from equipment import models as equipment_models
 from django.utils.dateparse import parse_date
-
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 
 class Command(BaseCommand):
     help = "Load dummy data into the database"
 
     def handle(self, *args, **kwargs):
+        self.setup_permissions()
+
         self.create_dummy_departments()
-        self.create_dummy_user_type()
+        # self.create_dummy_user_type()
         self.create_dummy_plant()
         self.create_dummy_line()
         self.create_dummy_station()
@@ -27,6 +30,79 @@ class Command(BaseCommand):
         self.create_dummy_shedule()
         self.stdout.write(self.style.SUCCESS("Dummy data loaded successfully!"))
 
+
+    def setup_permissions(self):
+        """Set up permissions for different user groups"""
+        permission_mapping = {
+            'Super Admin': {
+                account_models.Department: ['add', 'change', 'delete', 'view'],
+                equipment_models.Line: ['add', 'change', 'delete', 'view'],
+                equipment_models.Station: ['add', 'change', 'delete', 'view'],
+                equipment_models.Equipment: ['add', 'change', 'delete', 'view'],
+                equipment_models.EquipmentType: ['add', 'change', 'delete', 'view'],
+                equipment_models.MasterAuditParameter: ['add', 'change', 'delete', 'view'],
+                account_models.User: ['add', 'change', 'delete', 'view'],  # Added User permissions
+            },
+            'Portal Admin': {
+                equipment_models.Plant: ['add', 'change', 'delete', 'view'],
+                account_models.Department: ['add', 'change', 'delete', 'view'],
+                equipment_models.Line: ['add', 'change', 'delete', 'view'],
+                equipment_models.Station: ['add', 'change', 'delete', 'view'],
+                equipment_models.Equipment: ['add', 'change', 'delete', 'view'],
+                equipment_models.EquipmentType: ['add', 'change', 'delete', 'view'],
+                equipment_models.MasterAuditParameter: ['add', 'change', 'delete', 'view'],
+                account_models.User: ['add', 'change', 'delete', 'view'],  # Added User permissions
+            },
+            'Admin': {
+                equipment_models.Equipment: ['add', 'change', 'delete', 'view'],
+                equipment_models.Checkpoint: ['add', 'change', 'delete', 'view'],
+                equipment_models.MasterAuditParameter: ['add', 'change', 'delete', 'view'],
+                account_models.User: ['add', 'change', 'delete', 'view'],  # Added User permissions
+            },
+            'Auditor': {
+                equipment_models.Plant: ['view'],
+                account_models.Department: ['view'],
+                equipment_models.Line: ['view'],
+                equipment_models.Station: ['view'],
+                equipment_models.Equipment: ['view'],
+                equipment_models.EquipmentType: ['view'],
+                equipment_models.Checkpoint: ['view'],
+                equipment_models.MasterAuditParameter: ['view'],
+                equipment_models.Observation: ['add', 'change', 'delete', 'view'],
+            }
+        }
+
+        for group_name, model_permissions in permission_mapping.items():
+            group, created = Group.objects.get_or_create(name=group_name)
+            if created:
+                self.stdout.write(f'Created group: {group_name}')
+            
+            # Clear existing permissions for clean setup
+            group.permissions.clear()
+            
+            # Assign new permissions
+            for model, permissions in model_permissions.items():
+                content_type = ContentType.objects.get_for_model(model)
+                for permission in permissions:
+                    codename = f'{permission}_{model._meta.model_name}'
+                    try:
+                        perm = Permission.objects.get(
+                            codename=codename,
+                            content_type=content_type
+                        )
+                        group.permissions.add(perm)
+                        self.stdout.write(
+                            f'Added {permission} permission for {model.__name__} to {group_name}'
+                        )
+                    except Permission.DoesNotExist:
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f'Permission {codename} does not exist for {model.__name__}'
+                            )
+                        )
+
+        self.stdout.write(self.style.SUCCESS('Successfully set up all permissions'))
+
     def load_json_data(self, filename):
         """Helper method to load JSON data from a file."""
         file_path = os.path.join("shared/dummy", filename)
@@ -39,10 +115,10 @@ class Command(BaseCommand):
             account_models.Department.objects.get_or_create(id=item["id"],name=item.get("name"))
 
 
-    def create_dummy_user_type(self):
-        data = self.load_json_data("user_types.json")
-        for item in data:
-            Group.objects.get_or_create(name=item.get("name"))
+    # def create_dummy_user_type(self):
+    #     data = self.load_json_data("user_types.json")
+    #     for item in data:
+    #         Group.objects.get_or_create(name=item.get("name"))
 
     def create_dummy_plant(self):
         data = self.load_json_data("plants.json")
@@ -170,3 +246,4 @@ class Command(BaseCommand):
                 schedule_type_id=item["schedule_type"],
                 schedule_date=item["schedule_date"]
             )
+    

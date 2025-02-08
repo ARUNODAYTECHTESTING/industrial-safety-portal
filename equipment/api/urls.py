@@ -27,6 +27,8 @@ urlpatterns = [
     path("filter-data/",equipment_views.FilterDataView.as_view(),name = 'filter-data'),
     path("audit-summery/",equipment_views.AuditSummary.as_view(),name = 'audit-summery'),
     path("auditor-summery/",equipment_views.AuditorAuditSummary.as_view(),name = 'auditor-summery'),
+    path("notification/",equipment_views.NotificationView.as_view(),name = 'notification'),
+
 
 
 

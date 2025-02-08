@@ -698,6 +698,72 @@ class FilterDataView(generics.ListAPIView):
 
 
 
+class NotificationView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    queryset = equipment_models.Observation.objects.all()
+    serializer_class = equipment_serializers.ObservationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = [
+        'request_status', 
+        'approve_status',
+    ]
+
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Comprehensive Audit Overview",
+        operation_description="Retrieve detailed audit statistics including total audits, compliance score, and status breakdown"
+    )
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # Apply any filters from the request
+        group_names = request.user.groups.values_list('name', flat=True)
+        if set(group_names).intersection({"Auditor", "Auditors"}):
+            queryset = queryset.filter(owner=request.user)
+        else:
+            user_id = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("user_id",flat=True)
+            queryset = queryset.filter(owner__in=user_id)
+
+        # Total Audits Completed
+        total_audits = queryset.filter(request_status="complete").count()
+        
+        # Pending Audits
+        pending_audits = queryset.filter(request_status='pending').count()
+        
+        # Compliance Score Calculation
+        total_observations = queryset.count()
+        approved_observations = queryset.filter(approve_status='approved').count()
+        compliance_score = (approved_observations / total_observations * 100) if total_observations > 0 else 0
+        
+        # Detailed Status Breakdown
+        status_breakdown = {
+            'pending': queryset.filter(request_status='pending').count(),
+            'ongoing': queryset.filter(request_status='ongoing').count(),
+            'complete': queryset.filter(request_status='complete').count(),
+            'failed': queryset.filter(request_status='failed').count()
+        }
+        
+        # Pass vs Fail Breakdown
+        pass_fail_breakdown = {
+            'passed': queryset.filter(approve_status='approved').count(),
+            'rejected': queryset.filter(approve_status='rejected').count(),
+            'pending_review': queryset.filter(approve_status='pending').count()
+        }
+        
+      
+       
+        
+        return Response({
+            'summary_cards': {
+                'total_audits': total_audits,
+                'pending_audits': pending_audits,
+                'compliance_score': round(compliance_score, 2),
+                'pass_fail_ratio': pass_fail_breakdown
+            },
+            'status_breakdown': status_breakdown,
+           
+        })
 class AuditSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -772,6 +838,7 @@ class AuditSummary(generics.ListAPIView):
             'status_breakdown': status_breakdown,
            
         })
+
 
 class AuditorAuditSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]

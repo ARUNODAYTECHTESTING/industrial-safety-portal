@@ -395,11 +395,10 @@ class ScheduleView(generics.ListCreateAPIView):
     @swagger_auto_schema(
         tags=['Schedule'],
         operation_summary="Create a schedule",
-        operation_description="Create a new schedule."
+        operation_description="Create a new schedule with the current user as assigned_by."
     )
-    def post(self, request, *args, **kwargs):
-        request.data['assigned_by'] = request.user 
-        return super().post(request, *args, **kwargs)
+    def perform_create(self, serializer):
+        serializer.save(assigned_by=self.request.user) 
 
 
 class ScheduleDetailsView(generics.RetrieveUpdateDestroyAPIView):

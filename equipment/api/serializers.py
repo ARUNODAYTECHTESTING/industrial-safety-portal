@@ -60,15 +60,17 @@ class StationSerializer(serializers.ModelSerializer):
     
 
 class ScheduleTypeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = equipment_models.ScheduleType
         fields = "__all__"
 class ScheduleSerializer(serializers.ModelSerializer):
+   
 
     class Meta:
         model = equipment_models.Schedule
         fields = "__all__"  # Adjust this if needed
+        extra_kwargs = {"assigned_by": {"read_only": True}}  # Read-only in input, but visible in response
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['plant'] = PlantSerializer(instance.plant).data
@@ -82,6 +84,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
         shedule_serializer =ScheduleTypeSerializer(instance.schedule_type).data
         representation['schedule_type'] = {'id':shedule_serializer.get('id'),'name':shedule_serializer.get('name')}
         representation['user'] = {"id":instance.user.id, 'name':instance.user.name}
+        representation['assigned_by'] = {"id":instance.assigned_by.id, 'name':instance.assigned_by.name}
         return representation
    
 

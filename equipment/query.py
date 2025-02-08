@@ -8,7 +8,6 @@ class PlantQuery(equipment_interface.IPlant):
 
 class ScheduleQuery(equipment_interface.ISchedule):
     def get_schedule_by_user(self, user):
-        print(f"User to check {user}")
         return equipment_models.Schedule.objects.filter(user=user).values_list("equipment",flat=True)
     def get_schedule_by_user_list(self, user_list):
         return equipment_models.Schedule.objects.filter(user_id__in=user_list)
@@ -17,5 +16,4 @@ class ScheduleQuery(equipment_interface.ISchedule):
     
 class EquipmentQuery(equipment_interface.IEquipment):
     def get_equipment_by_id(self, id):
-        print(f"id recieve : {id}")
-        return equipment_models.Equipment.objects.filter(id__in=id)
+        return equipment_models.Equipment.objects.filter(id__in=list(id))

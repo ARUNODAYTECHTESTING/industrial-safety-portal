@@ -103,7 +103,7 @@ class Schedule(shared_models.TimeStamp):
     station = models.ForeignKey(Station,on_delete=models.CASCADE,related_name="schedule")
     schedule_type = models.ForeignKey(ScheduleType,on_delete=models.CASCADE,related_name="schedule")
     schedule_date = models.DateField(null=True,blank=True)
-
+    assigned_by = models.ForeignKey("account.User",on_delete=models.CASCADE,related_name="owner_schedule")
     def save(self, *args, **kwargs):
         if self.pk is None:
             obj = Schedule.objects.filter().last()

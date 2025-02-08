@@ -389,10 +389,7 @@ class ScheduleView(generics.ListCreateAPIView):
         if set(group_names).intersection({"Auditor", "Auditors"}):
             self.queryset = self.queryset.filter(user=request.user)
         else:
-            user_list = account_query.UserQuery().get_user_by_owner(request.user)
-            user_list.append(request.user.id)
-            print(f"user list : {user_list}")
-            self.queryset = equipment_query.ScheduleQuery().get_schedule_by_user_list(user_list)
+            self.queryset = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user)
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -401,6 +398,7 @@ class ScheduleView(generics.ListCreateAPIView):
         operation_description="Create a new schedule."
     )
     def post(self, request, *args, **kwargs):
+        request.data['assigned_by'] = request.user 
         return super().post(request, *args, **kwargs)
 
 

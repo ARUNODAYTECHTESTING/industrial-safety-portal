@@ -12,6 +12,8 @@ class ScheduleQuery(equipment_interface.ISchedule):
         return equipment_models.Schedule.objects.filter(user=user).values_list("equipment",flat=True)
     def get_schedule_by_user_list(self, user_list):
         return equipment_models.Schedule.objects.filter(user_id__in=user_list)
+    def get_schedule_assigned_by(self, assigner):
+        return equipment_models.Schedule.objects.filter(assigned_by=assigner)
     
 class EquipmentQuery(equipment_interface.IEquipment):
     def get_equipment_by_id(self, id):

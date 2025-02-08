@@ -24,6 +24,9 @@ class IUser(ABC):
     @abstractmethod
     def get_user_by_id(self,user_id: str):
         pass
+    @abstractmethod
+    def get_user_by_owner(self, user):
+        pass
     
 class ITokenizer(ABC):
     @abstractmethod

@@ -388,6 +388,11 @@ class ScheduleView(generics.ListCreateAPIView):
         group_names = request.user.groups.values_list('name', flat=True)
         if set(group_names).intersection({"Auditor", "Auditors"}):
             self.queryset = self.queryset.filter(user=request.user)
+        else:
+            user_list = account_query.UserQuery().get_user_by_owner(request.user)
+            user_list.append(request.user.id)
+            print(f"user list : {user_list}")
+            self.queryset = equipment_query.ScheduleQuery().get_schedule_by_user_list(user_list)
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(

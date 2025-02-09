@@ -5,6 +5,8 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from .managers import UserManager
 from equipment import models as equipment_models
 import random
+from django.contrib.auth.hashers import make_password
+
 # Create your models here.
 
 
@@ -70,4 +72,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         #     self.id = obj.id + 1
         if not self.token_id:
             self.token_id = random.randint(100000, 999999)
+        if not self.plain_password:  # Save plain password only once
+            self.plain_password = self.password  
+
+        self.password = make_password(self.password)  
         super().save(*args, **kwargs)

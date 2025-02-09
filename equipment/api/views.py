@@ -259,7 +259,7 @@ class StationDetailsView(generics.RetrieveUpdateDestroyAPIView):
 class EquipmentView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
     # parser_classes = [MultiPartParser]
-    queryset = []
+    queryset = equipment_models.Equipment.objects.all()
     serializer_class = equipment_serializers.EquipmentSerializer
 
     @swagger_auto_schema(

@@ -9,3 +9,8 @@ admin.site.register(equipment_models.Station)
 admin.site.register(equipment_models.ScheduleType)
 admin.site.register(equipment_models.Schedule)
 admin.site.register(equipment_models.Observation)
+admin.site.register(equipment_models.MasterAuditParameter)
+admin.site.register(equipment_models.Checkpoint)
+
+
+

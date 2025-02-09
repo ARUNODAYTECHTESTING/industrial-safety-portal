@@ -11,7 +11,16 @@ import random
 class Department(shared_models.TimeStamp):
     name = models.CharField(max_length=64,unique=True)
 
-
+    def __str__(self):
+        return f"{self.id}-{self.name}"
+  
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            obj = Department.objects.filter().last()
+            if obj:
+                self.id = obj.id + 1
+        super().save(*args, **kwargs)
+    
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_("email address"), unique=True)
     phone = models.CharField(max_length=16,null=True,blank=True)
@@ -28,7 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     def __str__(self):
-        return self.email
+        return f"{self.id}-{self.email}"
     
     class Meta:
         permissions = [
@@ -55,6 +64,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         ]
 
     def save(self, *args, **kwargs):
+        # obj = User.objects.filter().last()
+        # if obj:
+        #     self.id = obj.id + 1
         if not self.token_id:
             self.token_id = random.randint(100000, 999999)
         super().save(*args, **kwargs)

@@ -1,3 +1,4 @@
+3.110.183.2333.110.183.23
 version: '3.8'
 services:
   web:
@@ -5,7 +6,7 @@ services:
     build: 
       context: ./
       dockerfile: Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8005 --timeout 120
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8005
     volumes:
       - ./:/app/
       - static_volume:/app/static

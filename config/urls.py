@@ -26,7 +26,7 @@ if not settings.DEBUG:
             title="OCR API",
             default_version='v1',
         ),
-        url='http://ec2-13-126-227-202.ap-south-1.compute.amazonaws.com:1337/',
+        url='http://3.110.183.233/',
         public=True,
         permission_classes=(permissions.AllowAny,),
     )
@@ -36,7 +36,7 @@ else:
             title="OCR API",
             default_version='v1',
         ),
-        url='http://localhost:1337/',
+        url='http://localhost/',
         public=True,
         permission_classes=(permissions.AllowAny,),
     )

@@ -1,0 +1,22 @@
+[
+  {"id": 1, "name": "Conveyor System", "equipment_type_id": 1, "plant_id": 1, "line_id": 1, "station_id": 1, "qr": null, "sheet": "Sheet A"},
+  {"id": 2, "name": "Hydraulic Press 200T", "equipment_type_id": 2, "plant_id": 2, "line_id": 2, "station_id": 2, "qr": null, "sheet": "Sheet B"},
+  {"id": 3, "name": "Robotic Arm Welder", "equipment_type_id": 3, "plant_id": 3, "line_id": 3, "station_id": 3, "qr": null, "sheet": "Sheet C"},
+  {"id": 4, "name": "CNC Milling Machine", "equipment_type_id": 4, "plant_id": 4, "line_id": 4, "station_id": 4, "qr": null, "sheet": "Sheet D"},
+  {"id": 5, "name": "High-Speed Lathe", "equipment_type_id": 5, "plant_id": 5, "line_id": 5, "station_id": 5, "qr": null, "sheet": "Sheet E"},
+  {"id": 6, "name": "Heavy-Duty Drill", "equipment_type_id": 6, "plant_id": 6, "line_id": 6, "station_id": 6, "qr": null, "sheet": "Sheet F"},
+  {"id": 7, "name": "Surface Grinding Machine", "equipment_type_id": 7, "plant_id": 7, "line_id": 7, "station_id": 7, "qr": null, "sheet": "Sheet G"},
+  {"id": 8, "name": "Plastic Injection Molder", "equipment_type_id": 8, "plant_id": 8, "line_id": 8, "station_id": 8, "qr": null, "sheet": "Sheet H"},
+  {"id": 9, "name": "Automated Welding System", "equipment_type_id": 9, "plant_id": 9, "line_id": 9, "station_id": 9, "qr": null, "sheet": "Sheet I"},
+  {"id": 10, "name": "3D Printing System", "equipment_type_id": 10, "plant_id": 10, "line_id": 10, "station_id": 10, "qr": null, "sheet": "Sheet J"},
+  {"id": 11, "name": "Smart Packaging Unit", "equipment_type_id": 11, "plant_id": 1, "line_id": 1, "station_id": 1, "qr": null, "sheet": "Sheet K"},
+  {"id": 12, "name": "Forklift Electric", "equipment_type_id": 12, "plant_id": 2, "line_id": 2, "station_id": 2, "qr": null, "sheet": "Sheet L"},
+  {"id": 13, "name": "Gantry Crane", "equipment_type_id": 13, "plant_id": 3, "line_id": 3, "station_id": 3, "qr": null, "sheet": "Sheet M"},
+  {"id": 14, "name": "Pneumatic Cylinder", "equipment_type_id": 14, "plant_id": 4, "line_id": 4, "station_id": 4, "qr": null, "sheet": "Sheet N"},
+  {"id": 15, "name": "Industrial Cooling Tower", "equipment_type_id": 15, "plant_id": 5, "line_id": 5, "station_id": 5, "qr": null, "sheet": "Sheet O"},
+  {"id": 16, "name": "Heavy-Duty Air Compressor", "equipment_type_id": 16, "plant_id": 6, "line_id": 6, "station_id": 6, "qr": null, "sheet": "Sheet P"},
+  {"id": 17, "name": "Centrifugal Water Pump", "equipment_type_id": 17, "plant_id": 7, "line_id": 7, "station_id": 7, "qr": null, "sheet": "Sheet Q"},
+  {"id": 18, "name": "Large Heat Exchanger", "equipment_type_id": 18, "plant_id": 8, "line_id": 8, "station_id": 8, "qr": null, "sheet": "Sheet R"},
+  {"id": 19, "name": "High-Pressure Boiler", "equipment_type_id": 19, "plant_id": 9, "line_id": 9, "station_id": 9, "qr": null, "sheet": "Sheet S"},
+  {"id": 20, "name": "Rotary Vacuum Pump", "equipment_type_id": 20, "plant_id": 10, "line_id": 10, "station_id": 10, "qr": null, "sheet": "Sheet T"}
+]

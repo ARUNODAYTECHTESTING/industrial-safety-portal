@@ -33,7 +33,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     plant = models.ForeignKey(equipment_models.Plant, on_delete=models.SET_NULL, null = True,blank=True,related_name="user")
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null =True,blank=True,related_name="user")
     manage_by = models.ForeignKey('self', on_delete=models.SET_NULL, null =True,blank=True,related_name="user")
-    plain_password = models.CharField(max_length=64,null=True,blank=True)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
@@ -72,8 +71,5 @@ class User(AbstractBaseUser, PermissionsMixin):
         #     self.id = obj.id + 1
         if not self.token_id:
             self.token_id = random.randint(100000, 999999)
-        if not self.plain_password:  # Save plain password only once
-            self.plain_password = self.password  
-
-        self.password = make_password(self.password)  
+     
         super().save(*args, **kwargs)

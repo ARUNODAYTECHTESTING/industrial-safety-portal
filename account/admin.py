@@ -19,12 +19,12 @@ class UserResource(resources.ModelResource):
 
     class Meta:
         model = User
-        fields = ('id','token_id','plain_password')  # Add required fields
+        fields = ('id','token_id',)  # Add required fields
 
 @admin.register(User)
 class UserAdmin(ImportExportModelAdmin):
     resource_class = UserResource  # Use custom export resource
-    list_display = ('id','password','get_groups','token_id','plain_password','email','phone','name','plant','department','manage_by')
+    list_display = ('id','password','get_groups','token_id','email','phone','name','plant','department','manage_by')
     search_fields = ('email', 'name','token_id')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
     def get_groups(self, obj):

@@ -764,12 +764,76 @@ class AuditSummary(generics.ListAPIView):
             'status_breakdown': status_breakdown,
            
         })
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from django.db.models import Q
+import logging
+
+logger = logging.getLogger(__name__)
+
 class NotificationSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-
     queryset = equipment_models.Observation.objects.all()
     serializer_class = equipment_serializers.ObservationSerializer
-   
+
+    def get_filtered_queryset(self, user, base_queryset):
+        """Helper method to get filtered queryset based on user role"""
+        if not user or not base_queryset:
+            logger.warning("User or base_queryset is None")
+            return []
+
+        common_values = [
+            "id",
+            "checkpoint__equipment__name",
+            "updated_at",
+            "request_status",
+            "owner__name",
+            "remark",
+            "owner__schedule__assigned_by__name",
+        ]
+
+        try:
+            # Filter out completed requests
+            filtered_queryset = base_queryset.exclude(request_status="complete")
+            
+            # Get user groups
+            user_groups = set(user.groups.values_list('name', flat=True))
+            
+            # Check if user is an auditor
+            if "Auditor" in user_groups or "Auditors" in user_groups:
+                if user.last_login is None:
+                    logger.warning(f"User {user.id} has no last_login timestamp")
+                    return filtered_queryset.filter(
+                        owner=user
+                    ).values(*common_values)
+                    
+                return filtered_queryset.filter(
+                    owner=user,
+                    updated_at__gt=user.last_login
+                ).values(*common_values)
+
+            # For non-auditors
+            schedule_query = equipment_query.ScheduleQuery()
+            assigned_users = schedule_query.get_schedule_assigned_by(user)
+            
+            if assigned_users is None:
+                logger.warning(f"No assigned users found for user {user.id}")
+                return []
+                
+            user_ids = assigned_users.values_list("user_id", flat=True)
+            
+            if not user_ids:
+                logger.warning(f"Empty user_ids list for user {user.id}")
+                return []
+                
+            return filtered_queryset.filter(
+                owner__in=list(user_ids)
+            ).values(*common_values)
+
+        except Exception as e:
+            logger.error(f"Error in get_filtered_queryset: {str(e)}")
+            return []
 
     @swagger_auto_schema(
         tags=['Audit'],
@@ -777,39 +841,19 @@ class NotificationSummary(generics.ListAPIView):
         operation_description="Retrieve detailed audit statistics including total audits, compliance score, and status breakdown"
     )
     def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset().exclude(request_status="complete")  # Exclude "complete" status
-
-        # Apply filters based on user group
-        group_names = request.user.groups.values_list('name', flat=True)
-        print(f"date : {request.user.last_login}")
-        if set(group_names).intersection({"Auditor", "Auditors"}):
-            queryset = queryset.filter(
-                owner=request.user, 
-                updated_at__gt=request.user.last_login
-            ).values(
-                "id", 
-                "checkpoint__equipment__name", 
-                "updated_at", 
-                "request_status", 
-                "owner__name", 
-                "remark",
-                "owner__schedule__assigned_by__name",
-                
-            )
-        else:
-            user_id = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("user_id", flat=True)
-            queryset = queryset.filter(owner__in=user_id).values(
-                "id", 
-                "checkpoint__equipment__name", 
-                "updated_at", 
-                "request_status", 
-                "owner__name", 
-                "remark",
-                "owner__schedule__assigned_by__name",
-            )
-
-        return Response({"status": 200, "data": queryset})
-
+        try:
+            queryset = self.get_filtered_queryset(request.user, self.get_queryset())
+            return Response({
+                "status": 200,
+                "data": list(queryset)  # Explicitly convert to list
+            },status=200)
+        except Exception as e:
+            logger.error(f"Error in get method: {str(e)}")
+            return Response({
+                "status": 500,
+                "error": "An error occurred while processing your request",
+                "detail": str(e)
+            }, status=500)
 
 class AuditorAuditSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -23,6 +23,14 @@ from django.db.models import Count, Q,Max
 
 from django.db.models import Count, Q, F, ExpressionWrapper, DecimalField
 from django.db.models.functions import Coalesce
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from django.db.models import Q
+import logging
+
+logger = logging.getLogger(__name__)
+
 class EquipmentTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
 
@@ -260,15 +268,15 @@ class EquipmentView(generics.ListCreateAPIView):
         operation_description="Retrieve a list of equipment or create new equipment."
     )
     def get(self, request, *args, **kwargs):
-        group_names = request.user.groups.values_list('name', flat=True)
-        if set(group_names).intersection({"Auditor", "Auditors"}):
-            equipments = equipment_query.ScheduleQuery().get_schedule_by_user(request.user)
-            if len(equipments) > 0:
-                self.queryset = equipment_query.EquipmentQuery().get_equipment_by_id(equipments)
-        else:
-            schedule = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("equipment",flat=True)
-            if len(schedule) > 0:
-                self.queryset = equipment_query.EquipmentQuery().get_equipment_by_id(schedule)     
+        # group_names = request.user.groups.values_list('name', flat=True)
+        # if set(group_names).intersection({"Auditor", "Auditors"}):
+        #     equipments = equipment_query.ScheduleQuery().get_schedule_by_user(request.user)
+        #     if len(equipments) > 0:
+        #         self.queryset = equipment_query.EquipmentQuery().get_equipment_by_id(equipments)
+        # # else:
+        # #     schedule = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("equipment",flat=True)
+        # #     if len(schedule) > 0:
+        # #         self.queryset = equipment_query.EquipmentQuery().get_equipment_by_id(schedule)     
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -726,10 +734,10 @@ class AuditSummary(generics.ListAPIView):
             queryset = queryset.filter(owner__in=user_id)
 
         # Total Audits Completed
-        total_audits = queryset.filter(request_status="complete").count()
+        total_audits = queryset.filter(request_status="closed").count()
         
         # Pending Audits
-        pending_audits = queryset.filter(request_status='pending').count()
+        pending_audits = queryset.filter(request_status='open').count()
         
         # Compliance Score Calculation
         total_observations = queryset.count()
@@ -738,10 +746,10 @@ class AuditSummary(generics.ListAPIView):
         
         # Detailed Status Breakdown
         status_breakdown = {
-            'pending': queryset.filter(request_status='pending').count(),
-            'ongoing': queryset.filter(request_status='ongoing').count(),
-            'complete': queryset.filter(request_status='complete').count(),
-            'failed': queryset.filter(request_status='failed').count()
+            'pending': queryset.filter(request_status='open').count(),
+            'ongoing': queryset.filter(request_status='resolved').count(),
+            'complete': queryset.filter(request_status='closed').count(),
+            # 'failed': queryset.filter(request_status='failed').count()
         }
         
         # Pass vs Fail Breakdown
@@ -764,13 +772,6 @@ class AuditSummary(generics.ListAPIView):
             'status_breakdown': status_breakdown,
            
         })
-from rest_framework import generics, permissions
-from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from django.db.models import Q
-import logging
-
-logger = logging.getLogger(__name__)
 
 class NotificationSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -870,10 +871,10 @@ class AuditorAuditSummary(generics.ListAPIView):
         auditor_performance = self.queryset.annotate(
             # Audit Counts
             total_audits=Count('observations', distinct=True),
-            completed_audits=Count('observations', filter=Q(observations__request_status='complete'), distinct=True),
-            pending_audits=Count('observations', filter=Q(observations__request_status='pending'), distinct=True),
-            ongoing_audits=Count('observations', filter=Q(observations__request_status='ongoing'), distinct=True),
-            failed_audits=Count('observations', filter=Q(observations__request_status='failed'), distinct=True),
+            completed_audits=Count('observations', filter=Q(observations__request_status='closed'), distinct=True),
+            pending_audits=Count('observations', filter=Q(observations__request_status='open'), distinct=True),
+            ongoing_audits=Count('observations', filter=Q(observations__request_status='resolved'), distinct=True),
+            # failed_audits=Count('observations', filter=Q(observations__request_status='failed'), distinct=True),
             
             # Approval Status Counts
             approved_audits=Count('observations', filter=Q(observations__approve_status='approved'), distinct=True),
@@ -896,7 +897,7 @@ class AuditorAuditSummary(generics.ListAPIView):
             'completed_audits',
             'pending_audits',
             'ongoing_audits',
-            'failed_audits',
+            # 'failed_audits',
             'approved_audits',
             'rejected_audits',
             'compliance_score'
@@ -929,7 +930,7 @@ class AuditorAuditSummary(generics.ListAPIView):
                     'completed': auditor['completed_audits'],
                     'pending': auditor['pending_audits'],
                     'ongoing': auditor['ongoing_audits'],
-                    'failed': auditor['failed_audits']
+                    # 'failed': auditor['failed_audits']
                 },
                 
                 # Approval Status Details

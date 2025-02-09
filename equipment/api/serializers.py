@@ -127,12 +127,21 @@ class ObservationSerializer(serializers.ModelSerializer):
         
         # Serialize the checkpoint and keep only 'id' and 'name'
         checkpoint_data = CheckPointSerializer(instance.checkpoint).data
+        print(f"check equipment data : {checkpoint_data}")
         representation['checkpoint'] =  checkpoint_data.get("audit_parameter"),
         owner_data = account_api_serializers.UserSerializer(instance.owner).data
         representation['owner'] = {"id": owner_data.get("id"),"name": owner_data.get("name")}
         department_serializer =account_api_serializers.DepartmentSerializer(instance.department).data
         representation['department'] = {'id':department_serializer.get('id'),'name':department_serializer.get('name')}
         representation['plant'] = PlantSerializer(instance.plant).data
+        representation['equipment'] = {
+                                "equipment_id":instance.checkpoint.equipment.id,
+                                "equipment_name":instance.checkpoint.equipment.name,
+                                "equipment_type_id":instance.checkpoint.equipment.equipment_type.id,
+                                "equipment_type":instance.checkpoint.equipment.equipment_type.name
+                                }
+        representation['schedule'] = {"id":instance.schedule.id,"fullfillment_date":instance.schedule.fullfillment_date,"status":instance.schedule.status} if instance.schedule else None
+
         return representation
 
 class EquipmentSerializer(serializers.ModelSerializer):

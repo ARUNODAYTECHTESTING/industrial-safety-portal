@@ -4,7 +4,7 @@ from shared import models as shared_models
 # Create your models here.
 
 class Plant(shared_models.TimeStamp):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64,unique=True)
 
     def __str__(self):
        return self.name
@@ -18,7 +18,7 @@ class Plant(shared_models.TimeStamp):
 
 
 class Line(shared_models.TimeStamp):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64,unique=True)
     plant = models.ForeignKey(Plant,on_delete=models.CASCADE,related_name="line")
 
     def __str__(self):
@@ -33,7 +33,7 @@ class Line(shared_models.TimeStamp):
 
 
 class Station(shared_models.TimeStamp):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64,unique=True)
     plant = models.ForeignKey(Plant,on_delete=models.CASCADE,related_name="station")
     line = models.ForeignKey(Line,on_delete=models.CASCADE,related_name="station")
 
@@ -49,7 +49,7 @@ class Station(shared_models.TimeStamp):
 
    
 class EquipmentType(shared_models.TimeStamp):
-    name = models.CharField(max_length=64)    
+    name = models.CharField(max_length=64,unique=True)    
 
     def __str__(self):
        return self.name
@@ -63,7 +63,7 @@ class EquipmentType(shared_models.TimeStamp):
 
 
 class Equipment(shared_models.TimeStamp):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64,unique=True)
     equipment_type = models.ForeignKey(EquipmentType,on_delete=models.CASCADE)
     plant = models.ForeignKey(Plant,on_delete=models.CASCADE,related_name="equipment")
     # department = models.ForeignKey('account.Department',on_delete=models.CASCADE,related_name="equipment")
@@ -84,7 +84,7 @@ class Equipment(shared_models.TimeStamp):
 
 
 class ScheduleType(shared_models.TimeStamp):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64,unique=True)
 
     def save(self, *args, **kwargs):
         if self.pk is None:

@@ -164,4 +164,17 @@ class EquipmentSerializer(serializers.ModelSerializer):
     
     def get_checkpoints(self, instance):
         return instance.checkpoints.filter().values('audit_parameter__id','audit_parameter__name')
-        
+    
+    def create(self, validated_data):
+        # Remove 'audit_parameter' before creating the instance
+        audit_parameter_data = validated_data.pop('audit_parameter', None)
+
+        # Create Equipment instance
+        equipment_instance = equipment_models.Equipment.objects.create(**validated_data)
+
+        # Handle 'audit_parameter' if needed (e.g., save it elsewhere)
+        if audit_parameter_data:
+            # You may need to link or store this data in a related model
+            pass  
+
+        return equipment_instance

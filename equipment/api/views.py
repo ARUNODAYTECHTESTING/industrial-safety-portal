@@ -285,16 +285,18 @@ class EquipmentView(generics.ListCreateAPIView):
         operation_description="Create new equipment."
     )
     def post(self, request, *args, **kwargs):
-        payload = request.data
-        response = super().post(request, *args, **kwargs)
-        equipment = equipment_models.Equipment.objects.get(id=response.data['id'])
-        audit_parameters = equipment_models.MasterAuditParameter.objects.filter(id__in = payload.get('audit_parameter'))
-        if audit_parameters:
-            for audit_parameter in audit_parameters:
-                equipment_models.Checkpoint.objects.create(equipment=equipment,audit_parameter = audit_parameter)
-        return Response({"message": "Equipment created successfully"},status = status.HTTP_201_CREATED)
+        try:
+            payload = request.data
+            response = super().post(request, *args, **kwargs)
+            equipment = equipment_models.Equipment.objects.get(id=response.data['id'])
+            audit_parameters = equipment_models.MasterAuditParameter.objects.filter(id__in = payload.get('audit_parameter'))
+            if audit_parameters:
+                for audit_parameter in audit_parameters:
+                    equipment_models.Checkpoint.objects.create(equipment=equipment,audit_parameter = audit_parameter)
+            return Response({"message": "Equipment created successfully"},status = status.HTTP_201_CREATED)
 
-
+        except Exception as e:
+            return Response({"message": str(e)}, status = status.HTTP_400_BAD_REQUEST)
 class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
 

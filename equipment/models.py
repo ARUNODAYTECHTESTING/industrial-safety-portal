@@ -95,6 +95,10 @@ class ScheduleType(shared_models.TimeStamp):
 
 
 class Schedule(shared_models.TimeStamp):
+    SCHEDULE_STATUS = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+    )
     user = models.ForeignKey('account.User',on_delete=models.CASCADE,related_name="schedule")
     equipment = models.ForeignKey(Equipment,on_delete=models.CASCADE)
     plant = models.ForeignKey(Plant,on_delete=models.CASCADE,related_name="schedule")
@@ -102,8 +106,13 @@ class Schedule(shared_models.TimeStamp):
     line = models.ForeignKey(Line,on_delete=models.CASCADE,related_name="schedule")
     station = models.ForeignKey(Station,on_delete=models.CASCADE,related_name="schedule")
     schedule_type = models.ForeignKey(ScheduleType,on_delete=models.CASCADE,related_name="schedule")
-    schedule_date = models.DateField(null=True,blank=True)
+    # TODO: Never chnaged timestamped to be schedule
+    schedule_date = models.DateTimeField(null=True,blank=True)
     assigned_by = models.ForeignKey("account.User",on_delete=models.CASCADE,related_name="owner_schedule")
+    # TODO: update full fillment once observation created
+    fullfillment_date = models.DateTimeField(null=True,blank=True)
+    status = models.CharField(max_length=10, choices=SCHEDULE_STATUS, default='pending')
+
     def save(self, *args, **kwargs):
         if self.pk is None:
             obj = Schedule.objects.filter().last()
@@ -142,11 +151,18 @@ class Checkpoint(shared_models.TimeStamp):
 
 # TODO: ORC
 class Observation(shared_models.TimeStamp):
+    # Open resolved closed
     REQUEST_STATUS_COICE = (
-    ('pending', 'Pending'),
-    ('ongoing', 'Ongoing'),
-    ('complete', 'Complete')
+        ('open', 'Open'),
+        ('resolved', 'Resolved'),
+        ('closed', 'Closed'),
     )
+    # REQUEST_STATUS_COICE = (
+    # ('pending', 'Pending'),
+    # ('ongoing', 'Ongoing'),
+    # ('complete', 'Complete')
+    # )
+
     APPROVED_STATUS_COICE = (
         ('pending', 'Pending'),
         ('approved', 'Approved'),
@@ -164,9 +180,14 @@ class Observation(shared_models.TimeStamp):
     remark = models.CharField(max_length=64,null=True,blank=True)
     request_status = models.CharField(max_length=10, choices=REQUEST_STATUS_COICE, default='pending')
     approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICE,default='pending')
-    target_date = models.DateField()
-
-
+    # TODO: Action owner / not disclose
+    target_date = models.DateTimeField()
+    # TODO: once observatiob get approved tasrget_complete_date will be add
+    actual_complete_date = models.DateTimeField(null=True, blank=True)
+    # TODO: if assigner comes then schedule entry will be fine / else tranffer stuff / disclosed
+    schedule = models.ForeignKey(Schedule, related_name="observations", on_delete=models.SET_NULL,null=True)
+    # TODO: Action owner
+    action_owner = models.ForeignKey("account.User", related_name="action_owner_observations", on_delete=models.SET_NULL, null=True)
     def save(self, *args, **kwargs):
         if self.pk is None:
             obj = Observation.objects.filter().last()

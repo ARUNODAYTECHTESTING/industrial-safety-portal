@@ -30,7 +30,7 @@ from django.db.models import Q
 import logging
 
 logger = logging.getLogger(__name__)
-
+from account import permissions as account_permissions
 class EquipmentTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
 
@@ -579,6 +579,7 @@ class ObservationApiView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser]
     queryset = equipment_models.Observation.objects.all()
+
     serializer_class = equipment_serializers.ObservationSerializer
 
     @swagger_auto_schema(
@@ -587,6 +588,8 @@ class ObservationApiView(generics.ListCreateAPIView):
         operation_description="Retrieve a list of observation or create new observation."
     )
     def get(self, request, *args, **kwargs):
+        if account_permissions.RoleManager(request.user).is_auditor():
+            self.queryset = self.queryset.filter(owner=request.user)
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(

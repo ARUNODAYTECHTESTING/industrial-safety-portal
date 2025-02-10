@@ -181,7 +181,7 @@ class Observation(shared_models.TimeStamp):
     request_status = models.CharField(max_length=10, choices=REQUEST_STATUS_COICE, default='pending')
     approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICE,default='pending')
     # TODO: Action owner / not disclose
-    target_date = models.DateTimeField()
+    target_date = models.DateTimeField(null=True, blank=True)
     # TODO: once observatiob get approved tasrget_complete_date will be add
     actual_complete_date = models.DateTimeField(null=True, blank=True)
     # TODO: if assigner comes then schedule entry will be fine / else tranffer stuff / disclosed

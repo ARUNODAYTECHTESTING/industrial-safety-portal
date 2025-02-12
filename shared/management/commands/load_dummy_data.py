@@ -216,7 +216,7 @@ class Command(BaseCommand):
             try:
                 user, created = account_models.User.objects.get_or_create(
                     name=item.get("name"),
-                    password=account_utils.PasswordManager.hash_password('123456'),
+                    password=account_utils.PasswordManager.hash_password(item.get("password")),
                     department_id=item.get("department"),
                     plant_id=item.get("plant"),
                     email=item.get("email"),

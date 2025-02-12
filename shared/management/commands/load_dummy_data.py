@@ -216,11 +216,12 @@ class Command(BaseCommand):
             try:
                 user, created = account_models.User.objects.get_or_create(
                     name=item.get("name"),
-                    password=account_utils.PasswordManager.hash_password(item.get("password")),
+                    password=account_utils.PasswordManager.hash_password('123456'),
                     department_id=item.get("department"),
                     plant_id=item.get("plant"),
                     email=item.get("email"),
                     phone=item.get("phone"),
+                    token_id=item.get("token"),
                 )
                 user.groups.set(item.get("user_type", []))
                 user.save()

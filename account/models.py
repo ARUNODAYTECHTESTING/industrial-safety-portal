@@ -65,10 +65,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         ]
 
-    # def save(self, *args, **kwargs):
-    #     if not self.token_id:
-    #         self.token_id = random.randint(100000, 999999)
-    #     if self.password and not self.password.startswith('pbkdf2_sha256$'):
-    #         self.password = make_password(self.password)
+    def save(self, *args, **kwargs):
+        if not self.token_id:
+            self.token_id = random.randint(100000, 999999)
+        if self.password and not self.password.startswith('pbkdf2_sha256$'):
+            self.password = make_password(self.password)
         
-    #     super().save(*args, **kwargs)
+        super().save(*args, **kwargs)

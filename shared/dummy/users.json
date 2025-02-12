@@ -1,367 +1,102 @@
 [
     {
-      "name": "Amitabh Bachchan",
-      "password": "admin1",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "amitabh.bachchan@gmail.com",
-      "phone": "909090931"
-    },
-    {
-      "name": "Shah Rukh Khan",
-      "password": "admin2",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "shahrukh.khan@gmail.com",
-      "phone": "909090932"
-    },
-    {
-      "name": "Salman Khan",
-      "password": "admin3",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "salman.khan@gmail.com",
-      "phone": "909090933"
-    },
-    {
-      "name": "Ranbir Kapoor",
-      "password": "admin4",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "ranbir.kapoor@gmail.com",
-      "phone": "909090934"
-    },
-    {
-      "name": "Aamir Khan",
-      "password": "admin5",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "aamir.khan@gmail.com",
-      "phone": "909090935"
-    },
-    {
-      "name": "Ranveer Singh",
-      "password": "admin6",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "ranveer.singh@gmail.com",
-      "phone": "909090936"
-    },
-    {
-      "name": "Hrithik Roshan",
-      "password": "admin7",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "hrithik.roshan@gmail.com",
-      "phone": "909090937"
-    },
-    {
-      "name": "Ajay Devgn",
-      "password": "admin8",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "ajay.devgn@gmail.com",
-      "phone": "909090938"
-    },
-    {
-      "name": "Vicky Kaushal",
-      "password": "admin9",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "vicky.kaushal@gmail.com",
-      "phone": "909090939"
-    },
-    {
-      "name": "Varun Dhawan",
-      "password": "admin10",
-      "user_type": "1",
-      "department": 1,
-      "plant": 1,
-      "email": "varun.dhawan@gmail.com",
-      "phone": "909090940"
-    },
-  
-  
-    {
         "name": "Lionel Messi",
         "password": "admin1",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "messi.lionel@gmail.com",
-        "phone": "909090901"
+        "phone": "909090901",
+        "token_id": 679606
     },
     {
         "name": "Cristiano Ronaldo",
         "password": "admin2",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "ronaldo.cristiano@gmail.com",
-        "phone": "909090902"
+        "phone": "909090902",
+        "token_id": 849551
     },
     {
         "name": "Neymar Jr",
         "password": "admin3",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "neymar.jr@gmail.com",
-        "phone": "909090903"
+        "phone": "909090903",
+        "token_id": 594165
     },
     {
-        "name": "Kylian Mbappé",
+        "name": "Kylian Mbapp\u00e9",
         "password": "admin4",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "mbappe.kylian@gmail.com",
-        "phone": "909090904"
+        "phone": "909090904",
+        "token_id": 451916
     },
     {
         "name": "Kevin De Bruyne",
         "password": "admin5",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "debruyne.kevin@gmail.com",
-        "phone": "909090905"
+        "phone": "909090905",
+        "token_id": 224974
     },
     {
         "name": "Erling Haaland",
         "password": "admin6",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "haaland.erling@gmail.com",
-        "phone": "909090906"
+        "phone": "909090906",
+        "token_id": 668530
     },
     {
         "name": "Mohamed Salah",
         "password": "admin7",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "salah.mohamed@gmail.com",
-        "phone": "909090907"
+        "phone": "909090907",
+        "token_id": 983151
     },
     {
         "name": "Robert Lewandowski",
         "password": "admin8",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "lewandowski.robert@gmail.com",
-        "phone": "909090908"
+        "phone": "909090908",
+        "token_id": 648556
     },
     {
-        "name": "Luka Modrić",
+        "name": "Luka Modri\u0107",
         "password": "admin9",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "modric.luka@gmail.com",
-        "phone": "909090909"
+        "phone": "909090909",
+        "token_id": 226852
     },
     {
         "name": "Virgil van Dijk",
         "password": "admin10",
-        "user_type": "1",
+        "user_type": "2",
         "department": 1,
         "plant": 1,
         "email": "vandijk.virgil@gmail.com",
-        "phone": "909090910"
-    },
-    {
-        "name": "Lin Dan",
-        "password": "admin1",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "lin.dan@gmail.com",
-        "phone": "909090911"
-      },
-      {
-        "name": "Lee Chong Wei",
-        "password": "admin2",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "lee.chongwei@gmail.com",
-        "phone": "909090912"
-      },
-      {
-        "name": "Carolina Marin",
-        "password": "admin3",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "carolina.marin@gmail.com",
-        "phone": "909090913"
-      },
-      {
-        "name": "PV Sindhu",
-        "password": "admin4",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "pv.sindhu@gmail.com",
-        "phone": "909090914"
-      },
-      {
-        "name": "Kento Momota",
-        "password": "admin5",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "kento.momota@gmail.com",
-        "phone": "909090915"
-      },
-      {
-        "name": "Saina Nehwal",
-        "password": "admin6",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "saina.nehwal@gmail.com",
-        "phone": "909090916"
-      },
-      {
-        "name": "Chen Long",
-        "password": "admin7",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "chen.long@gmail.com",
-        "phone": "909090917"
-      },
-      {
-        "name": "Taufik Hidayat",
-        "password": "admin8",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "taufik.hidayat@gmail.com",
-        "phone": "909090918"
-      },
-      {
-        "name": "Hendra Setiawan",
-        "password": "admin9",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "hendra.setiawan@gmail.com",
-        "phone": "909090919"
-      },
-      {
-        "name": "Mulyo Handoyo",
-        "password": "admin10",
-        "user_type": "3",
-        "department": 1,
-        "plant": 1,
-        "email": "mulyo.handoyo@gmail.com",
-        "phone": "909090920"
-      },
-      {
-        "name": "Ariana Grande",
-        "password": "admin1",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "ariana.grande@gmail.com",
-        "phone": "909090921"
-      },
-      {
-        "name": "Ed Sheeran",
-        "password": "admin2",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "ed.sheeran@gmail.com",
-        "phone": "909090922"
-      },
-      {
-        "name": "Taylor Swift",
-        "password": "admin3",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "taylor.swift@gmail.com",
-        "phone": "909090923"
-      },
-      {
-        "name": "Billie Eilish",
-        "password": "admin4",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "billie.eilish@gmail.com",
-        "phone": "909090924"
-      },
-      {
-        "name": "Drake",
-        "password": "admin5",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "drake@gmail.com",
-        "phone": "909090925"
-      },
-      {
-        "name": "Beyoncé",
-        "password": "admin6",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "beyonce@gmail.com",
-        "phone": "909090926"
-      },
-      {
-        "name": "Shawn Mendes",
-        "password": "admin7",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "shawn.mendes@gmail.com",
-        "phone": "909090927"
-      },
-      {
-        "name": "Katy Perry",
-        "password": "admin8",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "katy.perry@gmail.com",
-        "phone": "909090928"
-      },
-      {
-        "name": "Rihanna",
-        "password": "admin9",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "rihanna@gmail.com",
-        "phone": "909090929"
-      },
-      {
-        "name": "Justin Bieber",
-        "password": "admin10",
-        "user_type": "4",
-        "department": 1,
-        "plant": 1,
-        "email": "justin.bieber@gmail.com",
-        "phone": "909090930"
-      }
-    
-      
-  ]
-  
+        "phone": "909090910",
+        "token_id": 859309
+    }
+]

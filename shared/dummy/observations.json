@@ -1,22 +1,182 @@
 [
-  {"name": "Loose Wiring", "checkpoint": 2, "image": null, "attempt": 1, "category": "Safety", "corrective_remark": "Check wiring connections.", "owner": 1, "department": 1, "plant": 1, "remark": "Ensure wiring is secure and insulated.", "request_status": "open", "approve_status": "approved", "target_date": "2025-02-15"},
-  {"name": "Leaking Pipe", "checkpoint": 2, "image": null, "attempt": 2, "category": "Maintenance", "corrective_remark": "Replace leaking pipe.", "owner": 2, "department": 2, "plant": 2, "remark": "Fix all visible leaks in pipes.", "request_status": "resolved", "approve_status": "rejected", "target_date": "2025-02-20"},
-  {"name": "Broken Handle", "checkpoint": 2, "image": null, "attempt": 1, "category": "Quality", "corrective_remark": "Replace broken handle.", "owner": 3, "department": 3, "plant": 3, "remark": "Ensure all handles are intact.", "request_status": "closed", "approve_status": "approved", "target_date": "2025-02-25"},
-  {"name": "Unstable Structure", "checkpoint": 2, "image": null, "attempt": 2, "category": "Safety", "corrective_remark": "Secure unstable structure.", "owner": 4, "department": 4, "plant": 4, "remark": "Check structural stability regularly.", "request_status": "open", "approve_status": "open", "target_date": "2025-03-01"},
-  {"name": "Overheating Motor", "checkpoint": 2, "image": null, "attempt": 1, "category": "Maintenance", "corrective_remark": "Cool down motor and check fan.", "owner": 5, "department": 5, "plant": 5, "remark": "Prevent overheating of critical components.", "request_status": "resolved", "approve_status": "approved", "target_date": "2025-03-05"},
-  {"name": "Missing Bolt", "checkpoint": 2, "image": null, "attempt": 3, "category": "Safety", "corrective_remark": "Replace missing bolt.", "owner": 6, "department": 6, "plant": 6, "remark": "Ensure all bolts are tightened and secure.", "request_status": "closed", "approve_status": "rejected", "target_date": "2025-03-10"},
-  {"name": "Rust Formation", "checkpoint": 2, "image": null, "attempt": 1, "category": "Maintenance", "corrective_remark": "Clean rust from equipment.", "owner": 7, "department": 7, "plant": 7, "remark": "Treat rust to avoid further damage.", "request_status": "open", "approve_status": "approved", "target_date": "2025-03-12"},
-  {"name": "Clogged Filter", "checkpoint": 2, "image": null, "attempt": 2, "category": "Quality", "corrective_remark": "Clean or replace the filter.", "owner": 8, "department": 8, "plant": 8, "remark": "Ensure proper airflow through filters.", "request_status": "resolved", "approve_status": "open", "target_date": "2025-03-15"},
-  {"name": "Oil Spill", "checkpoint": 2, "image": null, "attempt": 3, "category": "Safety", "corrective_remark": "Clean up oil spill immediately.", "owner": 9, "department": 9, "plant": 9, "remark": "Ensure all spillages are contained and cleaned.", "request_status": "closed", "approve_status": "approved", "target_date": "2025-03-18"},
-  {"name": "Excessive Vibration", "checkpoint": 2, "image": null, "attempt": 1, "category": "Maintenance", "corrective_remark": "Check and replace damaged parts.", "owner": 10, "department": 10, "plant": 10, "remark": "Inspect machinery for excessive vibration.", "request_status": "open", "approve_status": "rejected", "target_date": "2025-03-20"},
-  {"name": "Damaged Cable", "checkpoint": 2, "image": null, "attempt": 2, "category": "Quality", "corrective_remark": "Replace damaged cable.", "owner": 1, "department": 1, "plant": 1, "remark": "Ensure all cables are intact and functional.", "request_status": "resolved", "approve_status": "approved", "target_date": "2025-03-25"},
-  {"name": "Blocked Ventilation", "checkpoint": 2, "image": null, "attempt": 3, "category": "Safety", "corrective_remark": "Unblock ventilation system.", "owner": 2, "department": 2, "plant": 2, "remark": "Clear any blockages to ensure airflow.", "request_status": "closed", "approve_status": "approved", "target_date": "2025-03-28"},
-  {"name": "Sensor Malfunction", "checkpoint": 2, "image": null, "attempt": 1, "category": "Maintenance", "corrective_remark": "Replace faulty sensor.", "owner": 3, "department": 3, "plant": 3, "remark": "Ensure sensors are working correctly.", "request_status": "open", "approve_status": "open", "target_date": "2025-04-01"},
-  {"name": "Bent Frame", "checkpoint": 2, "image": null, "attempt": 2, "category": "Quality", "corrective_remark": "Straighten or replace bent frame.", "owner": 4, "department": 4, "plant": 4, "remark": "Ensure frame integrity.", "request_status": "resolved", "approve_status": "rejected", "target_date": "2025-04-05"},
-  {"name": "Worn-out Belt", "checkpoint": 2, "image": null, "attempt": 1, "category": "Maintenance", "corrective_remark": "Replace worn-out belt.", "owner": 5, "department": 5, "plant": 5, "remark": "Ensure smooth functioning of machinery.", "request_status": "closed", "approve_status": "approved", "target_date": "2025-04-08"},
-  {"name": "Software Error", "checkpoint": 2, "image": null, "attempt": 3, "category": "Safety", "corrective_remark": "Fix software error.", "owner": 6, "department": 6, "plant": 6, "remark": "Correct any software errors causing malfunctions.", "request_status": "open", "approve_status": "open", "target_date": "2025-04-12"},
-  {"name": "Overloaded Circuit", "checkpoint": 2, "image": null, "attempt": 1, "category": "Safety", "corrective_remark": "Unplug excess devices.", "owner": 7, "department": 7, "plant": 7, "remark": "Avoid overloading electrical circuits.", "request_status": "resolved", "approve_status": "rejected", "target_date": "2025-04-15"},
-  {"name": "Loose Screws", "checkpoint": 2, "image": null, "attempt": 2, "category": "Maintenance", "corrective_remark": "Tighten all loose screws.", "owner": 8, "department": 8, "plant": 8, "remark": "Ensure all screws are tightened.", "request_status": "closed", "approve_status": "approved", "target_date": "2025-04-20"},
-  {"name": "Unresponsive Panel", "checkpoint": 2, "image": null, "attempt": 1, "category": "Quality", "corrective_remark": "Repair unresponsive panel.", "owner": 9, "department": 9, "plant": 9, "remark": "Ensure all control panels are responsive.", "request_status": "open", "approve_status": "approved", "target_date": "2025-04-25"},
-  {"name": "Corroded Terminal", "checkpoint": 2, "image": null, "attempt": 3, "category": "Safety", "corrective_remark": "Clean and replace corroded terminal.", "owner": 10, "department": 10, "plant": 10, "remark": "Ensure terminals are corrosion-free.", "request_status": "resolved", "approve_status": "rejected", "target_date": "2025-04-30"}
+  {
+    "name": "Loose Wiring",
+    "checkpoint": 1,
+    "owner": 1,
+    "department": 2,
+    "plant": 3,
+    "request_status": "open",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Leaking Pipe",
+    "checkpoint": 2,
+    "owner": 4,
+    "department": 1,
+    "plant": 2,
+    "request_status": "resolved",
+    "approve_status": "rejected"
+  },
+  {
+    "name": "Broken Handle",
+    "checkpoint": 3,
+    "owner": 5,
+    "department": 3,
+    "plant": 1,
+    "request_status": "closed",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Unstable Structure",
+    "checkpoint": 4,
+    "owner": 2,
+    "department": 4,
+    "plant": 3,
+    "request_status": "open",
+    "approve_status": "pending"
+  },
+  {
+    "name": "Overheating Motor",
+    "checkpoint": 5,
+    "owner": 3,
+    "department": 5,
+    "plant": 2,
+    "request_status": "resolved",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Missing Bolt",
+    "checkpoint": 6,
+    "owner": 1,
+    "department": 2,
+    "plant": 3,
+    "request_status": "closed",
+    "approve_status": "rejected"
+  },
+  {
+    "name": "Rust Formation",
+    "checkpoint": 7,
+    "owner": 2,
+    "department": 3,
+    "plant": 1,
+    "request_status": "open",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Clogged Filter",
+    "checkpoint": 8,
+    "owner": 4,
+    "department": 5,
+    "plant": 2,
+    "request_status": "resolved",
+    "approve_status": "pending"
+  },
+  {
+    "name": "Oil Spill",
+    "checkpoint": 9,
+    "owner": 5,
+    "department": 1,
+    "plant": 3,
+    "request_status": "closed",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Excessive Vibration",
+    "checkpoint": 10,
+    "owner": 3,
+    "department": 4,
+    "plant": 2,
+    "request_status": "open",
+    "approve_status": "rejected"
+  },
+  {
+    "name": "Damaged Cable",
+    "checkpoint": 11,
+    "owner": 1,
+    "department": 3,
+    "plant": 1,
+    "request_status": "resolved",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Blocked Ventilation",
+    "checkpoint": 12,
+    "owner": 2,
+    "department": 5,
+    "plant": 2,
+    "request_status": "closed",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Sensor Malfunction",
+    "checkpoint": 13,
+    "owner": 4,
+    "department": 1,
+    "plant": 3,
+    "request_status": "open",
+    "approve_status": "pending"
+  },
+  {
+    "name": "Bent Frame",
+    "checkpoint": 14,
+    "owner": 5,
+    "department": 2,
+    "plant": 1,
+    "request_status": "resolved",
+    "approve_status": "rejected"
+  },
+  {
+    "name": "Worn-out Belt",
+    "checkpoint": 15,
+    "owner": 3,
+    "department": 4,
+    "plant": 2,
+    "request_status": "closed",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Software Error",
+    "checkpoint": 16,
+    "owner": 1,
+    "department": 5,
+    "plant": 3,
+    "request_status": "open",
+    "approve_status": "pending"
+  },
+  {
+    "name": "Overloaded Circuit",
+    "checkpoint": 17,
+    "owner": 2,
+    "department": 1,
+    "plant": 2,
+    "request_status": "resolved",
+    "approve_status": "rejected"
+  },
+  {
+    "name": "Loose Screws",
+    "checkpoint": 18,
+    "owner": 4,
+    "department": 3,
+    "plant": 1,
+    "request_status": "closed",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Unresponsive Panel",
+    "checkpoint": 19,
+    "owner": 5,
+    "department": 2,
+    "plant": 3,
+    "request_status": "open",
+    "approve_status": "approved"
+  },
+  {
+    "name": "Corroded Terminal",
+    "checkpoint": 20,
+    "owner": 3,
+    "department": 4,
+    "plant": 2,
+    "request_status": "resolved",
+    "approve_status": "rejected"
+  }
 ]

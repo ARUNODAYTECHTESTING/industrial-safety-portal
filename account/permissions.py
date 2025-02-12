@@ -1,26 +1,5 @@
 from rest_framework.permissions import BasePermission
 
-class IsPortalAdmin(BasePermission):
-    def has_permission(self, request, view):
-        if request.method == 'POST':
-            return request.user.groups.filter(name='Portal Admin').exists()
-        else:
-            return True
-class IsSuperAdmin(BasePermission):
-    def has_permission(self, request, view):
-        if request.method == 'POST':
-            return request.user.groups.filter(name='Super Admin').exists()
-        else:
-            return True
-class IsAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.groups.filter(name='Admin').exists()
-
-class IsAuditor(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.groups.filter(name='Auditor').exists()
-
-
 
 class RoleManager:
     def __init__(self,user = None):
@@ -38,4 +17,30 @@ class RoleManager:
 class PermissionManager(RoleManager):
     def __init__(self,user = None):
         super().__init__(user)
-    
+   
+    def has_permission(self,permission):
+        if permission == 'create':
+            return self.is_admin() or self.is_super_admin() or self.is_portal_admin()
+
+class IsPortalAdmin(BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return RoleManager(request.user).is_portal_admin()
+        else:
+            return True
+class IsSuperAdmin(BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return RoleManager(request.user).is_super_admin()
+        else:
+            return True
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return RoleManager(request.user).is_admin()
+        else:
+            return True
+class IsAuditor(BasePermission):
+    def has_permission(self, request, view):
+        return RoleManager(request.user).is_auditor()
+

@@ -204,9 +204,8 @@ class Command(BaseCommand):
                     department_id=item.get("department"),  
                     plant_id=item.get("plant"),  
                     remark=item.get("remark", ""),  
-                    request_status=item.get("request_status", "pending"),  
-                    approve_status=item.get("approve_status", "pending"), 
-                    target_date=parse_date(item.get("target_date"))
+                    request_status=item.get("request_status"),  
+                    approve_status=item.get("approve_status"), 
                 )
             except Exception as e:
                 print(f"Error creating observation: {e}")
@@ -234,6 +233,7 @@ class Command(BaseCommand):
     
     def create_dummy_shedule(self):
         data = self.load_json_data("shedules.json")
+        print("scheduel ---------------------------------------------------------")
         for item in data:
            
             equipment_models.Schedule.objects.get_or_create(
@@ -244,6 +244,6 @@ class Command(BaseCommand):
                 line_id=item["line"],
                 station_id=item["station"],
                 schedule_type_id=item["schedule_type"],
-                schedule_date=item["schedule_date"]
+                assigned_by_id = item["assigned_by"]
             )
     

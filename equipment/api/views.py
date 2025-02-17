@@ -588,8 +588,9 @@ class ObservationApiView(generics.ListCreateAPIView):
         operation_summary="Create observation",
         operation_description="Create new observation."
     )
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user) 
+
 
 class ObservationDetailsApiView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]

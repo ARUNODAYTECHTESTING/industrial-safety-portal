@@ -139,6 +139,7 @@ class ListUserView(generics.ListAPIView):
         operation_description="Retrieve a list of users"
     )
     def get(self, request, *args, **kwargs):
+        self.queryset = self.queryset.filter(manage_by = request.user)
         return super().get(request, *args, **kwargs)
 
 class UserDetailsView(generics.RetrieveUpdateDestroyAPIView):

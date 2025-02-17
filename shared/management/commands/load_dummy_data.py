@@ -13,21 +13,21 @@ class Command(BaseCommand):
     help = "Load dummy data into the database"
 
     def handle(self, *args, **kwargs):
-        self.setup_permissions()
+        # self.setup_permissions()
 
-        self.create_dummy_departments()
+        # self.create_dummy_departments()
         # self.create_dummy_user_type()
-        self.create_dummy_plant()
-        self.create_dummy_line()
-        self.create_dummy_station()
-        self.create_dummy_equipment_type()
-        self.create_dummy_equipment()
-        self.create_dummy_audit_parameter()
-        self.create_dummy_checkpoint()
-        self.create_dummy_observation()
+        # self.create_dummy_plant()
+        # self.create_dummy_line()
+        # self.create_dummy_station()
+        # self.create_dummy_equipment_type()
+        # self.create_dummy_equipment()
+        # self.create_dummy_audit_parameter()
+        # self.create_dummy_checkpoint()
+        # self.create_dummy_observation()
         self.dump_dummy_users_into_database()
-        self.create_dummy_shedule_type()
-        self.create_dummy_shedule()
+        # self.create_dummy_shedule_type()
+        # self.create_dummy_shedule()
         self.stdout.write(self.style.SUCCESS("Dummy data loaded successfully!"))
 
 
@@ -214,17 +214,20 @@ class Command(BaseCommand):
         data = self.load_json_data("users.json")
         for item in data:
             try:
-                user, created = account_models.User.objects.get_or_create(
-                    name=item.get("name"),
-                    password=account_utils.PasswordManager.hash_password(item.get("password")),
-                    department_id=item.get("department"),
-                    plant_id=item.get("plant"),
-                    email=item.get("email"),
-                    phone=item.get("phone"),
-                    token_id=item.get("token"),
+               user, created = account_models.User.objects.update_or_create(
+                    id=item.get("id"),
+                    defaults={
+                        "name": item.get("name"),
+                        "password": account_utils.PasswordManager.hash_password(item.get("password")),
+                        "department_id": item.get("department"),
+                        "plant_id": item.get("plant"),
+                        "email": item.get("email"),
+                        "phone": item.get("phone"),
+                        "token_id": item.get("token"),
+                        "manage_by_id": item.get("manage_by"),
+                    }
                 )
-                user.groups.set(item.get("user_type", []))
-                user.save()
+
             except Exception:
                 continue
     def create_dummy_shedule_type(self):

@@ -678,7 +678,8 @@ class FilterDataView(generics.ListAPIView):
         line = request.GET.get('line', None)
         station = request.GET.get('station', None)
         department = request.GET.get('department', None)
-
+        user_type = account_query.GroupQuery().get_user_type_level(request.user)
+        user_type_ids = [ut['id'] for ut in user_type]
         if plant is not None:
             self.queryset = equipment_models.Line.objects.filter(plant_id=plant)
             self.serializer_class = equipment_serializers.LineSerializer
@@ -688,13 +689,15 @@ class FilterDataView(generics.ListAPIView):
         elif station is not None:
             self.queryset = equipment_models.Station.objects.filter(id=station)
             self.serializer_class = equipment_serializers.StationSerializer
+        
         elif department is not None:
             self.queryset = account_models.User.objects.filter(department_id=department)
             self.serializer_class = account_serializers.UserSerializer
+            self.queryset = self.queryset.filter(groups__id__in=user_type_ids,manage_by = request.user)
+        
         else:
-            return Response({"detail": "Please provide at least one filter parameter (plant, line, station, department)."})
-
-        # Call the parent class's get method
+            self.queryset = account_models.User.objects.filter(groups__id__in=user_type_ids,manage_by = request.user)
+            self.serializer_class = account_serializers.UserSerializer
         return super().get(request, *args, **kwargs)
 
 

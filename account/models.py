@@ -32,6 +32,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=64)
     plant = models.ForeignKey(equipment_models.Plant, on_delete=models.SET_NULL, null = True,blank=True,related_name="user")
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null =True,blank=True,related_name="user")
+    line = models.ForeignKey(equipment_models.Line, on_delete=models.CASCADE,related_name="user")
+    station = models.ForeignKey(equipment_models.Station, on_delete=models.CASCADE,related_name="user")
     manage_by = models.ForeignKey('self', on_delete=models.SET_NULL, null =True,blank=True,related_name="user")
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

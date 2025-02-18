@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
     token_id = serializers.CharField(read_only = True)
     class Meta:
         model = account_models.User
-        fields = ['id','name','password','user_type','department','plant','email','phone','token_id']
+        fields = ['id','name','password','user_type','department','plant','line','station','email','phone','token_id']
         
     def to_representation(self, instance):
         representation = super().to_representation(instance)

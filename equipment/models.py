@@ -177,7 +177,7 @@ class Observation(shared_models.TimeStamp):
     owner = models.ForeignKey("account.User",related_name="observations",on_delete=models.SET_NULL,null=True)
     department = models.ForeignKey("account.Department",related_name="observations",on_delete=models.SET_NULL,null=True)
     plant = models.ForeignKey(Plant,related_name="observations",on_delete=models.SET_NULL,null=True)
-    remark = models.CharField(max_length=64,null=True,blank=True)
+    remark = models.TextField(null=True,blank=True)
     request_status = models.CharField(max_length=10, choices=REQUEST_STATUS_COICE, default='pending')
     approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICE,default='pending')
     # TODO: Action owner / not disclose

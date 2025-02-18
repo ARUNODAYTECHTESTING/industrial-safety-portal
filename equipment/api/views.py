@@ -734,7 +734,7 @@ class AuditSummary(generics.ListAPIView):
             queryset = queryset.filter(owner__in=user_id)
 
         # Total Audits Completed
-        total_audits = queryset.filter(request_status="closed").count()
+        total_audits = queryset.filter().count()
         
         # Pending Audits
         pending_audits = queryset.filter(request_status='open').count()

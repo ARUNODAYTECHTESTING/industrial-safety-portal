@@ -30,7 +30,8 @@ class UserSerializer(serializers.ModelSerializer):
         representation['plant'] = {"id":instance.plant.id,"name":instance.plant.name} if instance.plant else None
         representation["user_type"] = {"id":instance.groups.filter().first().id,"name":instance.groups.filter().first().name} if instance.groups.filter().first() else None
         representation["department"] = {"id":instance.department.id,"name":instance.department.name} if instance.department else None
-
+        representation['line'] = {"id":instance.line.id,"name":instance.line.name} if instance.line else None
+        representation['station'] = {"id":instance.station.id,"name":instance.station.name} if instance.station else None
         return representation
     
     def create(self, validated_data):

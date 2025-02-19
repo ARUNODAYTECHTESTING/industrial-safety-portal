@@ -681,8 +681,12 @@ class FilterDataView(generics.ListAPIView):
         user_type = account_query.GroupQuery().get_user_type_level(request.user)
         user_type_ids = [ut['id'] for ut in user_type]
         if plant is not None:
-            self.queryset = equipment_models.Line.objects.filter(plant_id=plant)
-            self.serializer_class = equipment_serializers.LineSerializer
+            if request.user.plant:
+                self.queryset = equipment_models.Line.objects.filter(plant_id=request.user.plant.id)
+                self.serializer_class = equipment_serializers.LineSerializer
+            else:
+                self.queryset = equipment_models.Line.objects.filter(plant_id=plant)
+                self.serializer_class = equipment_serializers.LineSerializer
         elif line is not None:
             self.queryset = equipment_models.Station.objects.filter(line_id=line)
             self.serializer_class = equipment_serializers.StationSerializer
@@ -691,11 +695,13 @@ class FilterDataView(generics.ListAPIView):
             self.serializer_class = equipment_serializers.StationSerializer
         
         elif department is not None:
-            self.queryset = account_models.User.objects.filter(department_id=department)
-            self.serializer_class = account_serializers.UserSerializer
-            self.queryset = self.queryset.filter(groups__id__in=user_type_ids,manage_by = request.user)
+            if request.user.department:
+                self.queryset = account_models.Department.objects.filter(id=request.user.department.id)
+                self.serializer_class = account_serializers.DepartmentSerializer
+                
         
         else:
+        
             self.queryset = account_models.User.objects.filter(groups__id__in=user_type_ids,manage_by = request.user)
             self.serializer_class = account_serializers.UserSerializer
         return super().get(request, *args, **kwargs)

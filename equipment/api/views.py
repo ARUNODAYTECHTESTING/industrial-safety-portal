@@ -690,7 +690,7 @@ class FilterDataView(generics.ListAPIView):
             if department is not None:
                 if request.user.department:
                     self.queryset = account_models.Department.objects.filter(id=request.user.department.id)
-                    self.serializer_class = account_serializers.DepartmentSerializer
+                    self.serializer_class = account_serializers.DepartmentSerijalizer
                 
         else:
          

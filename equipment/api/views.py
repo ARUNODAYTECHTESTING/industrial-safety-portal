@@ -674,38 +674,52 @@ class FilterDataView(generics.ListAPIView):
         ]
     )
     def get(self, request, *args, **kwargs):
-        if account_permissions.RoleManager(request.user).is_auditor():
-            return Response({"status":400,"data":"Auditor does'nt have permission to register user"},status=400)
         plant = request.GET.get('plant', None)
         line = request.GET.get('line', None)
         station = request.GET.get('station', None)
         department = request.GET.get('department', None)
-        user_type = account_query.GroupQuery().get_user_type_level(request.user)
-        user_type_ids = [ut['id'] for ut in user_type]
-        if plant is not None:
-            if request.user.plant:
-                self.queryset = equipment_models.Line.objects.filter(plant_id=request.user.plant.id)
-                self.serializer_class = equipment_serializers.LineSerializer
-            else:
-                self.queryset = equipment_models.Line.objects.filter(plant_id=plant)
-                self.serializer_class = equipment_serializers.LineSerializer
-        elif line is not None:
-            self.queryset = equipment_models.Station.objects.filter(line_id=line)
-            self.serializer_class = equipment_serializers.StationSerializer
-        elif station is not None:
-            self.queryset = equipment_models.Station.objects.filter(id=station)
-            self.serializer_class = equipment_serializers.StationSerializer
-        
-        elif department is not None:
-            if request.user.department:
-                self.queryset = account_models.Department.objects.filter(id=request.user.department.id)
-                self.serializer_class = account_serializers.DepartmentSerializer
+        if account_permissions.RoleManager(request.user).is_auditor():
+            if plant is not None:
+                if request.user.plant:
+                    self.queryset = equipment_models.Plant.objects.filter(plant_id=request.user.plant.id)
+                    self.serializer_class = equipment_serializers.PlantSerializer
+                else:
+                    self.queryset = equipment_models.Plant.objects.filter(plant_id=plant)
+                    self.serializer_class = equipment_serializers.PlantSerializer
+            
+            if department is not None:
+                if request.user.department:
+                    self.queryset = account_models.Department.objects.filter(id=request.user.department.id)
+                    self.serializer_class = account_serializers.DepartmentSerializer
                 
-        
         else:
-        
-            self.queryset = account_models.User.objects.filter(groups__id__in=user_type_ids,manage_by = request.user)
-            self.serializer_class = account_serializers.UserSerializer
+         
+            user_type = account_query.GroupQuery().get_user_type_level(request.user)
+            user_type_ids = [ut['id'] for ut in user_type]
+            if plant is not None:
+                if request.user.plant:
+                    self.queryset = equipment_models.Line.objects.filter(plant_id=request.user.plant.id)
+                    self.serializer_class = equipment_serializers.PlantSerializer
+                else:
+                    self.queryset = equipment_models.Line.objects.filter(plant_id=plant)
+                    self.serializer_class = equipment_serializers.LineSerializer
+            elif line is not None:
+                self.queryset = equipment_models.Station.objects.filter(line_id=line)
+                self.serializer_class = equipment_serializers.StationSerializer
+            elif station is not None:
+                self.queryset = equipment_models.Station.objects.filter(id=station)
+                self.serializer_class = equipment_serializers.StationSerializer
+            
+            elif department is not None:
+                if request.user.department:
+                    self.queryset = account_models.Department.objects.filter(id=request.user.department.id)
+                    self.serializer_class = account_serializers.DepartmentSerializer
+                    
+            
+            else:
+            
+                self.queryset = account_models.User.objects.filter(groups__id__in=user_type_ids,manage_by = request.user)
+                self.serializer_class = account_serializers.UserSerializer
         return super().get(request, *args, **kwargs)
 
 

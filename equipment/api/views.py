@@ -674,6 +674,8 @@ class FilterDataView(generics.ListAPIView):
         ]
     )
     def get(self, request, *args, **kwargs):
+        if account_permissions.RoleManager(request.user).is_auditor():
+            return Response({"status":400,"data":"Auditor does'nt have permission to register user"},status=400)
         plant = request.GET.get('plant', None)
         line = request.GET.get('line', None)
         station = request.GET.get('station', None)

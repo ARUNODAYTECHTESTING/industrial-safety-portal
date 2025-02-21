@@ -589,7 +589,7 @@ class ObservationApiView(generics.ListCreateAPIView):
         operation_description="Create new observation."
     )
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user) 
+        serializer.save(owner=self.request.user,department = self.request.user.department) 
 
 
 class ObservationDetailsApiView(generics.RetrieveUpdateDestroyAPIView):

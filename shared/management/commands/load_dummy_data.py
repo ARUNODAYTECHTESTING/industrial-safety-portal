@@ -41,6 +41,7 @@ class Command(BaseCommand):
                 equipment_models.Equipment: ['add', 'change', 'delete', 'view'],
                 equipment_models.EquipmentType: ['add', 'change', 'delete', 'view'],
                 equipment_models.MasterAuditParameter: ['add', 'change', 'delete', 'view'],
+                equipment_models.Schedule: ['add', 'change', 'delete', 'view'],
                 account_models.User: ['add', 'change', 'delete', 'view'],  # Added User permissions
             },
             'Portal Admin': {
@@ -50,6 +51,7 @@ class Command(BaseCommand):
                 equipment_models.Station: ['add', 'change', 'delete', 'view'],
                 equipment_models.Equipment: ['add', 'change', 'delete', 'view'],
                 equipment_models.EquipmentType: ['add', 'change', 'delete', 'view'],
+                equipment_models.Schedule: ['add', 'change', 'delete', 'view'],
                 equipment_models.MasterAuditParameter: ['add', 'change', 'delete', 'view'],
                 account_models.User: ['add', 'change', 'delete', 'view'],  # Added User permissions
             },
@@ -57,6 +59,7 @@ class Command(BaseCommand):
                 equipment_models.Equipment: ['add', 'change', 'delete', 'view'],
                 equipment_models.Checkpoint: ['add', 'change', 'delete', 'view'],
                 equipment_models.MasterAuditParameter: ['add', 'change', 'delete', 'view'],
+                equipment_models.Schedule: ['add', 'change', 'delete', 'view'],
                 account_models.User: ['add', 'change', 'delete', 'view'],  # Added User permissions
             },
             'Auditor': {
@@ -68,6 +71,7 @@ class Command(BaseCommand):
                 equipment_models.EquipmentType: ['view'],
                 equipment_models.Checkpoint: ['view'],
                 equipment_models.MasterAuditParameter: ['view'],
+                equipment_models.Schedule: ['view'],
                 equipment_models.Observation: ['add', 'change', 'delete', 'view'],
             }
         }

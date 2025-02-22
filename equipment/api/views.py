@@ -32,7 +32,7 @@ import logging
 logger = logging.getLogger(__name__)
 from account import permissions as account_permissions
 class EquipmentTypeView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,account_permissions.DynamicModelPermission]
 
     queryset = equipment_models.EquipmentType.objects.all()
     serializer_class = equipment_serializers.EquipmentTypeSerializer
@@ -58,7 +58,7 @@ class EquipmentTypeView(generics.ListCreateAPIView):
         pass
 
 class EquipmentTypeDetailsView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,account_permissions.DynamicModelPermission]
 
     queryset = equipment_models.EquipmentType.objects.all()
     serializer_class = equipment_serializers.EquipmentTypeSerializer
@@ -114,7 +114,7 @@ class PlantView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 class PlantDetailsView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,account_permissions.DynamicModelPermission]
     queryset = equipment_models.Plant.objects.all()
     serializer_class = equipment_serializers.PlantSerializer
     @swagger_auto_schema(
@@ -146,7 +146,7 @@ class PlantDetailsView(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 class LineView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,account_permissions.DynamicModelPermission]
     queryset = equipment_models.Line.objects.all()
     serializer_class = equipment_serializers.LineSerializer
 
@@ -168,7 +168,7 @@ class LineView(generics.ListCreateAPIView):
 
 
 class LineDetailsView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,account_permissions.DynamicModelPermission]
     queryset = equipment_models.Line.objects.all()
     serializer_class = equipment_serializers.LineSerializer
 
@@ -201,7 +201,7 @@ class LineDetailsView(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 class StationView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,account_permissions.DynamicModelPermission]
     queryset = equipment_models.Station.objects.all()
     serializer_class = equipment_serializers.StationSerializer
 
@@ -224,7 +224,7 @@ class StationView(generics.ListCreateAPIView):
     
 
 class StationDetailsView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,account_permissions.DynamicModelPermission]
     queryset = equipment_models.Station.objects.all()
     serializer_class = equipment_serializers.StationSerializer
 
@@ -257,7 +257,7 @@ class StationDetailsView(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 class EquipmentView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin,account_permissions.DynamicModelPermission]
     # parser_classes = [MultiPartParser]
     queryset = equipment_models.Equipment.objects.all()
     serializer_class = equipment_serializers.EquipmentSerializer
@@ -436,7 +436,7 @@ class ScheduleDetailsView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class MasterAuditParameter(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin,account_permissions.DynamicModelPermission]
     queryset = equipment_models.MasterAuditParameter.objects.all()
     serializer_class = equipment_serializers.MasterAuditParameterSerializer
 
@@ -458,7 +458,7 @@ class MasterAuditParameter(generics.ListCreateAPIView):
 
 
 class MasterAuditParameterDetails(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin,account_permissions.DynamicModelPermission]
     queryset = equipment_models.MasterAuditParameter.objects.all()
     serializer_class = equipment_serializers.MasterAuditParameterSerializer
 
@@ -493,7 +493,7 @@ class MasterAuditParameterDetails(generics.RetrieveUpdateDestroyAPIView):
 
 
 class CheckPointView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.IsAdmin,account_permissions.DynamicModelPermission]
     # parser_classes = [MultiPartParser]
     queryset = equipment_models.Checkpoint.objects.all()
     serializer_class = equipment_serializers.CheckPointSerializer

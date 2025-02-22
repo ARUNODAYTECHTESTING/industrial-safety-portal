@@ -205,3 +205,18 @@ class LoginView(views.APIView):
             return Response({"status": 400, 'data': str(e)}, status=HTTP_400_BAD_REQUEST)
 
 
+
+
+class CurrentUserDetails(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = account_models.User.objects.all()
+    serializer_class = account_api_serializers.UserSerializer
+
+    @swagger_auto_schema(
+        tags=['User'],
+        operation_summary="Retrieve current user details",
+        operation_description="Get the details of the current authenticated user."
+    )
+    def get(self, request, *args, **kwargs):
+        self.queryset = self.queryset.filter(id=request.user.id)
+        return super().get(request, *args, **kwargs)  # Use super() to prevent recursion

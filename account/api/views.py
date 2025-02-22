@@ -15,7 +15,7 @@ from account import utils as account_utils
 # Create your views here.
 
 class Department(views.APIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin,]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.DynamicModelPermission]
 
 
     @swagger_auto_schema(
@@ -122,7 +122,7 @@ class RegisterView(views.APIView):
             status,serializer = shared_serializers.SerializerValidator(serializer_class=account_api_serializers.UserSerializer).validate(payload=request.data)
             if status in [400]:
                 return Response({"status": status, 'data': serializer.errors}, status=HTTP_400_BAD_REQUEST)
-            serializer.save(manage_by = self.request.user)
+            serializer.save(manage_by = self.request.user,department=request.user.department,plant=request.user.plant)
             return Response({"status": status, 'data': "Registration Successfull"}, status=HTTP_201_CREATED)
         except Exception as e:
             return Response({"status": status, 'data': str(e)}, status=HTTP_400_BAD_REQUEST)

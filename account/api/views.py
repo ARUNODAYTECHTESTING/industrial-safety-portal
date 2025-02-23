@@ -15,7 +15,7 @@ from account import utils as account_utils
 # Create your views here.
 
 class Department(views.APIView):
-    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin|account_permissions.DynamicModelPermission]
+    permission_classes = [permissions.IsAuthenticated,account_permissions.IsPortalAdmin|account_permissions.IsSuperAdmin]
 
 
     @swagger_auto_schema(

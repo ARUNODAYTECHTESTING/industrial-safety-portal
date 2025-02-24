@@ -154,7 +154,7 @@ class Observation(shared_models.TimeStamp):
     # Open resolved closed
     REQUEST_STATUS_COICE = (
         ('open', 'Open'),
-        ('resolved', 'Resolved'),
+        ('in-progress', 'In-Progress'),
         ('closed', 'Closed'),
     )
     # REQUEST_STATUS_COICE = (
@@ -178,7 +178,7 @@ class Observation(shared_models.TimeStamp):
     department = models.ForeignKey("account.Department",related_name="observations",on_delete=models.SET_NULL,null=True)
     plant = models.ForeignKey(Plant,related_name="observations",on_delete=models.SET_NULL,null=True)
     remark = models.TextField(null=True,blank=True)
-    request_status = models.CharField(max_length=10, choices=REQUEST_STATUS_COICE, default='pending')
+    request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_COICE, default='open')
     approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICE,default='pending')
     # TODO: Action owner / not disclose
     target_date = models.DateTimeField(null=True, blank=True)

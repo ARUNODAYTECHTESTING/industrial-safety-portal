@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django.contrib.sites',
     # TODO: 'Custom-apps'
     'account.apps.AccountConfig',
     'shared.apps.SharedConfig',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'import_export'
 
 ]
+SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

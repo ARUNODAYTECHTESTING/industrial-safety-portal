@@ -3,6 +3,8 @@ import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
 from equipment import models as equipment_models
+from django.contrib.sites.models import Site
+from django.conf import settings
 # Abstraction
 class Notification(ABC):
     @abstractmethod
@@ -34,9 +36,13 @@ class EmailNotificationWithSendGrid(Notification):
 
 
 
-
-
-
+class HostManager:
+    @staticmethod
+    def get_base_url() -> str:
+        domain = Site.objects.get_current().domain
+        return domain
+   
+    
 class QRCodeManager:
     @staticmethod
     def generate_qr_code(id):
@@ -45,7 +51,10 @@ class QRCodeManager:
             print(f"Checking equipment QR: {equipment.qr}")
             
             if not equipment.qr:  # Check if QR exists
-                qr_data = str(equipment.id)  # Ensure it's a string
+                # TODO: qr_Data should be http://base_url:port/equipment/{id}
+                protocol ='http://' if settings.DEBUG else 'http://'
+                url = f"{protocol}{HostManager.get_base_url()}/equipment/{id}"
+                qr_data = str(url)  # Ensure it's a string
                 print(f"QR Data: {qr_data}")
                 
                 qr = qrcode.make(qr_data)

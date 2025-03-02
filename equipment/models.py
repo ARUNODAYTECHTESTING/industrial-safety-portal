@@ -1,6 +1,6 @@
 from django.db import models
 from shared import models as shared_models
-
+from shared import services as shared_services
 # Create your models here.
 
 class Plant(shared_models.TimeStamp):
@@ -81,7 +81,7 @@ class Equipment(shared_models.TimeStamp):
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
-
+        shared_services.QRCodeManager.generate_qr_code(self.id)
 
 class ScheduleType(shared_models.TimeStamp):
     name = models.CharField(max_length=64,unique=True)

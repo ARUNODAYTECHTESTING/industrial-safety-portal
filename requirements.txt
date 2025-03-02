@@ -23,3 +23,4 @@ gunicorn
 django-cors-headers 
 django-filter
 django-import-export
+qrcode

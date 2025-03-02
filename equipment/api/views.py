@@ -581,6 +581,7 @@ class ObservationApiView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         if account_permissions.RoleManager(request.user).is_auditor():
             self.queryset = self.queryset.filter(owner=request.user)
+        
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -611,8 +612,11 @@ class ObservationDetailsApiView(generics.RetrieveUpdateDestroyAPIView):
         operation_summary="Update observation",
         operation_description="Update an existing observation by its ID."
     )
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if instance.action_owner:
+            instance.request_status = "in-progress"
+            instance.save()
 
     @swagger_auto_schema(
         tags=['Observation'],
@@ -750,7 +754,7 @@ class AuditSummary(generics.ListAPIView):
         # Detailed Status Breakdown
         status_breakdown = {
             'pending': queryset.filter(request_status='open').count(),
-            'ongoing': queryset.filter(request_status='resolved').count(),
+            'ongoing': queryset.filter(request_status='in-progress').count(),
             'complete': queryset.filter(request_status='closed').count(),
             # 'failed': queryset.filter(request_status='failed').count()
         }
@@ -799,7 +803,7 @@ class NotificationSummary(generics.ListAPIView):
 
         try:
             # Filter out completed requests
-            filtered_queryset = base_queryset.exclude(request_status="complete")
+            filtered_queryset = base_queryset.exclude(request_status="closed")
             
             # Get user groups
             user_groups = set(user.groups.values_list('name', flat=True))
@@ -876,7 +880,7 @@ class AuditorAuditSummary(generics.ListAPIView):
             total_audits=Count('observations', distinct=True),
             completed_audits=Count('observations', filter=Q(observations__request_status='closed'), distinct=True),
             pending_audits=Count('observations', filter=Q(observations__request_status='open'), distinct=True),
-            ongoing_audits=Count('observations', filter=Q(observations__request_status='resolved'), distinct=True),
+            ongoing_audits=Count('observations', filter=Q(observations__request_status='in-progress'), distinct=True),
             # failed_audits=Count('observations', filter=Q(observations__request_status='failed'), distinct=True),
             
             # Approval Status Counts

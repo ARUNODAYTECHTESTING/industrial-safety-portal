@@ -781,6 +781,113 @@ class FilterDataView(generics.ListAPIView):
            
 #         })
 
+# class AuditSummary(generics.ListAPIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     queryset = equipment_models.Observation.objects.all()
+#     serializer_class = equipment_serializers.ObservationSerializer
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = [
+#         'request_status', 
+#         'approve_status',
+#     ]
+
+#     @swagger_auto_schema(
+#         tags=['Audit'],
+#         operation_summary="Comprehensive Audit Overview",
+#         operation_description="Retrieve detailed audit statistics including total audits, compliance score, and status breakdown"
+#     )
+#     def get(self, request, *args, **kwargs):
+#         queryset = self.get_queryset()
+
+#         # Apply any filters from the request
+#         group_names = request.user.groups.values_list('name', flat=True)
+#         if set(group_names).intersection({"Auditor", "Auditors"}):
+#             queryset = queryset.filter(owner=request.user)
+#         else:
+#             user_id = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("user_id",flat=True)
+#             queryset = queryset.filter(owner__in=user_id)
+
+#         # Total Audits Completed
+#         total_audits = queryset.filter().count()
+        
+#         # Pending Audits
+#         pending_audits = queryset.filter(request_status='open').count()
+        
+#         # Compliance Score Calculation
+#         total_observations = queryset.count()
+#         approved_observations = queryset.filter(approve_status='approved').count()
+#         compliance_score = (approved_observations / total_observations * 100) if total_observations > 0 else 0
+        
+#         # Detailed Status Breakdown
+#         status_breakdown = {
+#             'pending': queryset.filter(request_status='open').count(),
+#             'ongoing': queryset.filter(request_status='in-progress').count(),
+#             'complete': queryset.filter(request_status='closed').count(),
+#             # 'failed': queryset.filter(request_status='failed').count()
+#         }
+        
+#         # Pass vs Fail Breakdown
+#         pass_fail_breakdown = {
+#             'passed': queryset.filter(approve_status='approved').count(),
+#             'rejected': queryset.filter(approve_status='rejected').count(),
+#             'pending_review': queryset.filter(approve_status='pending').count()
+#         }
+        
+#         # Weekly Audit Summary
+#         today = timezone.now().date()
+#         week_start = today - timezone.timedelta(days=today.weekday())
+#         week_end = week_start + timezone.timedelta(days=6)
+        
+#         weekly_queryset = queryset.filter(created_at__date__range=[week_start, week_end])
+#         weekly_total = weekly_queryset.count()
+#         weekly_approved = weekly_queryset.filter(approve_status='approved').count()
+#         weekly_compliance = (weekly_approved / weekly_total * 100) if weekly_total > 0 else 0
+        
+#         weekly_summary = {
+#             'total_audits': weekly_total,
+#             'passed': weekly_approved,
+#             'rejected': weekly_queryset.filter(approve_status='rejected').count(),
+#             'pending_review': weekly_queryset.filter(approve_status='pending').count(),
+#             'compliance_score': round(weekly_compliance, 2),
+#             'status_breakdown': {
+#                 'pending': weekly_queryset.filter(request_status='open').count(),
+#                 'ongoing': weekly_queryset.filter(request_status='in-progress').count(),
+#                 'complete': weekly_queryset.filter(request_status='closed').count(),
+#             }
+#         }
+        
+#         # Daily Audit Summary
+#         daily_queryset = queryset.filter(created_at__date=today)
+#         daily_total = daily_queryset.count()
+#         daily_approved = daily_queryset.filter(approve_status='approved').count()
+#         daily_compliance = (daily_approved / daily_total * 100) if daily_total > 0 else 0
+        
+#         daily_summary = {
+#             'total_audits': daily_total,
+#             'passed': daily_approved,
+#             'rejected': daily_queryset.filter(approve_status='rejected').count(),
+#             'pending_review': daily_queryset.filter(approve_status='pending').count(),
+#             'compliance_score': round(daily_compliance, 2),
+#             'status_breakdown': {
+#                 'pending': daily_queryset.filter(request_status='open').count(),
+#                 'ongoing': daily_queryset.filter(request_status='in-progress').count(),
+#                 'complete': daily_queryset.filter(request_status='closed').count(),
+#             }
+#         }
+        
+#         return Response({
+#             'summary_cards': {
+#                 'total_audits': total_audits,
+#                 'pending_audits': pending_audits,
+#                 'compliance_score': round(compliance_score, 2),
+#                 'pass_fail_ratio': pass_fail_breakdown
+#             },
+#             'status_breakdown': status_breakdown,
+#             'weekly_summary': weekly_summary,
+#             'daily_summary': daily_summary
+#         })
+
 class AuditSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -805,11 +912,11 @@ class AuditSummary(generics.ListAPIView):
         if set(group_names).intersection({"Auditor", "Auditors"}):
             queryset = queryset.filter(owner=request.user)
         else:
-            user_id = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("user_id",flat=True)
+            user_id = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("user_id", flat=True)
             queryset = queryset.filter(owner__in=user_id)
 
         # Total Audits Completed
-        total_audits = queryset.filter().count()
+        total_audits = queryset.count()
         
         # Pending Audits
         pending_audits = queryset.filter(request_status='open').count()
@@ -824,7 +931,6 @@ class AuditSummary(generics.ListAPIView):
             'pending': queryset.filter(request_status='open').count(),
             'ongoing': queryset.filter(request_status='in-progress').count(),
             'complete': queryset.filter(request_status='closed').count(),
-            # 'failed': queryset.filter(request_status='failed').count()
         }
         
         # Pass vs Fail Breakdown
@@ -876,6 +982,28 @@ class AuditSummary(generics.ListAPIView):
             }
         }
         
+        # Monthly Audit Summary
+        month_start = today.replace(day=1)
+        next_month_start = (month_start + timezone.timedelta(days=32)).replace(day=1)
+        
+        monthly_queryset = queryset.filter(created_at__date__range=[month_start, next_month_start])
+        monthly_total = monthly_queryset.count()
+        monthly_approved = monthly_queryset.filter(approve_status='approved').count()
+        monthly_compliance = (monthly_approved / monthly_total * 100) if monthly_total > 0 else 0
+        
+        monthly_summary = {
+            'total_audits': monthly_total,
+            'passed': monthly_approved,
+            'rejected': monthly_queryset.filter(approve_status='rejected').count(),
+            'pending_review': monthly_queryset.filter(approve_status='pending').count(),
+            'compliance_score': round(monthly_compliance, 2),
+            'status_breakdown': {
+                'pending': monthly_queryset.filter(request_status='open').count(),
+                'ongoing': monthly_queryset.filter(request_status='in-progress').count(),
+                'complete': monthly_queryset.filter(request_status='closed').count(),
+            }
+        }
+        
         return Response({
             'summary_cards': {
                 'total_audits': total_audits,
@@ -885,8 +1013,10 @@ class AuditSummary(generics.ListAPIView):
             },
             'status_breakdown': status_breakdown,
             'weekly_summary': weekly_summary,
-            'daily_summary': daily_summary
+            'daily_summary': daily_summary,
+            'monthly_summary': monthly_summary
         })
+
 class NotificationSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = equipment_models.Observation.objects.all()

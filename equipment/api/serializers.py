@@ -178,3 +178,12 @@ class EquipmentSerializer(serializers.ModelSerializer):
             pass  
 
         return equipment_instance
+    
+
+class PerformAuditSerializer(serializers.ModelSerializer):
+    latitude = serializers.DecimalField(max_digits=10, decimal_places=6)
+    longitude = serializers.DecimalField(max_digits=10, decimal_places=6)
+    
+    class Meta:
+        model = equipment_models.Audit
+        fields = ["equipment","latitue","longitude"]

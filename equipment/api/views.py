@@ -29,6 +29,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from django.db.models import Q
 import logging
+from equipment import service as equipment_service
 
 logger = logging.getLogger(__name__)
 from account import permissions as account_permissions
@@ -1226,4 +1227,46 @@ class AuditorAuditSummary(generics.ListAPIView):
             # 'overall_performance_summary': overall_performance_summary
         })
     
+class PerformAuditView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = equipment_serializers.PerformAuditSerializer
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Create audit",
+        operation_description="Create a new audit for the specified equipment."
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            equipment = equipment_query.EquipmentQuery().get_object(request.data.get('equipment'))
+            if equipment is None:
+                return Response({"status":404,"message":"Equipment not found"},status=404)
+            # TODO: Verify location proximity
+            is_valid_location = equipment_service.EquipmentService.verify_equipment_location(
+            request.data.get('equipment'), 
+            request.data.get('latitude'), 
+            request.data.get('longitude')
+            )
+            if not is_valid_location:
+                return Response({"status":400,"data":"You must be within proximity of the equipment"},status=400)
 
+            # TODO:Find the corresponding schedule
+            schedule = equipment_query.ScheduleQuery().get_schedule_by_equipment(equipment_id=request.data.get('equipment'),user_id = request.user.id,date = timezone.now())
+            if schedule is None:
+                return Response({"status":404,"data":"No schedule found for the equipment and date"},status=404)
+            
+            # TODO: Create the audit record directly linked to equipment
+            audit = equipment_models.Audit.objects.create(
+                equipment=equipment,
+                schedule=schedule,
+                auditor=request.user
+            )
+            return Response({"status": 200, "data":"Audit created successfully"}, status=200)
+        except Exception as e:
+            return Response({"status": 400, "data":str(e)}, status=400)
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Get audit",
+        operation_description="Get an audit by its ID."
+    )
+    def get(self, request, *args, **kwargs):
+        pass

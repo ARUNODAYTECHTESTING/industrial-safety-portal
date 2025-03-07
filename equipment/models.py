@@ -1,6 +1,7 @@
 from django.db import models
 from shared import models as shared_models
 from shared import services as shared_services
+from django.utils import timezone
 # Create your models here.
 
 class Plant(shared_models.TimeStamp):
@@ -71,7 +72,8 @@ class Equipment(shared_models.TimeStamp):
     station = models.ForeignKey(Station,on_delete=models.CASCADE,related_name="equipment")
     qr = models.ImageField(upload_to='QR/',null=True,blank=True)
     sheet = models.CharField(max_length=64)
-
+    location_coordinates = models.CharField(max_length=100, help_text="Latitude,Longitude",null=True, blank=True)
+    location_radius = models.IntegerField(default=10, help_text="Radius in meters for QR validation",null=True, blank=True)
     def __str__(self):
        return self.name
 
@@ -149,7 +151,37 @@ class Checkpoint(shared_models.TimeStamp):
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
 
-# TODO: ORC
+
+# TODO: latest changes
+class Audit(models.Model):
+    STATUS_CHOICES = [
+        ('OPEN', 'Open'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('VERIFIED', 'Verified'),
+        ('CLOSED', 'Closed')
+    ]
+    name = models.CharField(max_length=64)
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    auditor = models.ForeignKey('account.User', on_delete=models.CASCADE)
+    audit_date = models.DateTimeField(default=timezone.now)
+    audit_status = models.CharField(max_length=24, choices=STATUS_CHOICES, default='OPEN')
+    audit_attempt = models.IntegerField(default=1)
+    parent_audit = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='follow_up_audits')
+    
+    def __str__(self):
+        return f"{self.equipment.name} - Attempt {self.audit_attempt} - {self.audit_date.strftime('%Y-%m-%d')}"
+    
+    @property
+    def is_reopened(self):
+        return self.audit_attempt > 1
+    
+    @property
+    def has_open_observations(self):
+        return self.observations.filter(status__in=['OPEN', 'IN_PROGRESS']).exists()
+
+
 class Observation(shared_models.TimeStamp):
     # Open resolved closed
     REQUEST_STATUS_COICE = (
@@ -157,11 +189,6 @@ class Observation(shared_models.TimeStamp):
         ('in-progress', 'In-Progress'),
         ('closed', 'Closed'),
     )
-    # REQUEST_STATUS_COICE = (
-    # ('pending', 'Pending'),
-    # ('ongoing', 'Ongoing'),
-    # ('complete', 'Complete')
-    # )
 
     APPROVED_STATUS_COICE = (
         ('pending', 'Pending'),
@@ -188,9 +215,13 @@ class Observation(shared_models.TimeStamp):
     schedule = models.ForeignKey(Schedule, related_name="observations", on_delete=models.SET_NULL,null=True)
     # TODO: Action owner
     action_owner = models.ForeignKey("account.User", related_name="action_owner_observations", on_delete=models.SET_NULL, null=True)
+    audit = models.ForeignKey(Audit, on_delete=models.CASCADE,related_name="observation")
     def save(self, *args, **kwargs):
         if self.pk is None:
             obj = Observation.objects.filter().last()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
+
+
+

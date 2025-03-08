@@ -1238,9 +1238,10 @@ class AuditorAuditSummary(generics.ListAPIView):
             # 'overall_performance_summary': overall_performance_summary
         })
     
-class PerformAuditView(generics.CreateAPIView):
+class PerformAuditView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = equipment_serializers.PerformAuditSerializer
+    queryset = equipment_models.Audit.objects.all()
     @swagger_auto_schema(
         tags=['Audit'],
         operation_summary="Create audit",
@@ -1248,12 +1249,12 @@ class PerformAuditView(generics.CreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         try:
-            equipment = equipment_query.EquipmentQuery().get_object(request.data.get('equipment'))
-            if equipment is None:
-                return Response({"status":404,"message":"Equipment not found"},status=404)
+            checkpoint = equipment_query.CheckPointQuery().get_object(request.data.get('checkpoint'))
+            if checkpoint is None:
+                return Response({"status":404,"message":"Checkpoint not found"},status=404)
             # TODO: Verify location proximity
             is_valid_location = equipment_service.EquipmentService.verify_equipment_location(
-            request.data.get('equipment'), 
+            checkpoint.equipment.id, 
             request.data.get('latitude'), 
             request.data.get('longitude')
             )
@@ -1261,13 +1262,14 @@ class PerformAuditView(generics.CreateAPIView):
                 return Response({"status":400,"data":"You must be within proximity of the equipment"},status=400)
 
             # TODO:Find the corresponding schedule
-            schedule = equipment_query.ScheduleQuery().get_schedule_by_equipment(equipment_id=request.data.get('equipment'),user_id = request.user.id,date = timezone.now())
+            schedule = equipment_query.ScheduleQuery().get_schedule_by_equipment(equipment_id=checkpoint.equipment.id,user_id = request.user.id)
             if schedule is None:
                 return Response({"status":404,"data":"No schedule found for the equipment and date"},status=404)
             
             # TODO: Create the audit record directly linked to equipment
             audit = equipment_models.Audit.objects.create(
-                equipment=equipment,
+                checkpoint = checkpoint,
+                equipment=checkpoint.equipment,
                 schedule=schedule,
                 auditor=request.user
             )
@@ -1280,4 +1282,13 @@ class PerformAuditView(generics.CreateAPIView):
         operation_description="Get an audit by its ID."
     )
     def get(self, request, *args, **kwargs):
-        pass
+        if account_permissions.RoleManager(request.user).is_auditor():
+            self.queryset = self.queryset.filter(auditor=request.user)
+        else:
+            schedule_queryset = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user)
+            
+            auditor_ids = list(schedule_queryset.values_list('user_id', flat=True).distinct())
+            
+            self.queryset = self.queryset.filter(auditor_id__in=auditor_ids)
+
+            return super().get(request, *args, **kwargs)

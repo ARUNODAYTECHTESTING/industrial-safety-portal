@@ -168,7 +168,6 @@ class Audit(models.Model):
     audit_date = models.DateTimeField(default=timezone.now)
     audit_status = models.CharField(max_length=24, choices=STATUS_CHOICES, default='OPEN')
     audit_attempt = models.IntegerField(default=1)
-    parent_audit = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='follow_up_audits')
     checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE,related_name="audits")
     is_ok = models.BooleanField(default=True)
     def __str__(self):

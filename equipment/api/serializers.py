@@ -180,9 +180,16 @@ class EquipmentSerializer(serializers.ModelSerializer):
     
 
 class PerformAuditSerializer(serializers.ModelSerializer):
-    latitude = serializers.DecimalField(max_digits=10, decimal_places=6)
-    longitude = serializers.DecimalField(max_digits=10, decimal_places=6)
+    latitude = serializers.DecimalField(max_digits=10, decimal_places=6,write_only=True)
+    longitude = serializers.DecimalField(max_digits=10, decimal_places=6,write_only=True)
     
     class Meta:
         model = equipment_models.Audit
-        fields = ["remark","checkpoint","latitude","longitude"]
+        fields = ["id","is_ok","remark","checkpoint","latitude","longitude"]
+        extra_kwargs = {"remark": {"read_only": True}}  
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['checkpoint'] = CheckPointSerializer(instance.checkpoint).data
+        return representation
+ 

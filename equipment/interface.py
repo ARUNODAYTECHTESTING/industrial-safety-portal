@@ -19,7 +19,7 @@ class ISchedule(abc.ABC):
     def get_schedule_assigned_by(self, assigner) -> List:
         pass
     @abc.abstractmethod
-    def get_schedule_by_equipment(self, equipment_id,user_id,date) -> object:
+    def get_schedule_by_equipment(self, equipment_id,user_id) -> object:
         pass
 
 class IEquipment(abc.ABC):
@@ -28,4 +28,10 @@ class IEquipment(abc.ABC):
         pass
     @abc.abstractmethod
     def get_object(self,id)->object:
+        pass
+
+
+class ICheckPoint(abc.ABC):
+    @abc.abstractmethod
+    def get_object(self, id) -> object:
         pass

@@ -193,7 +193,6 @@ class LoginView(views.APIView):
             if status in [400]:
                 return Response({"status": status, 'data': serializer.errors}, status=HTTP_400_BAD_REQUEST)
             user = account_query.UserQuery().get_user_by_token_id(token_id=serializer.data['token_id'])
-            print(f"User Found: {user}")
             if user is None or not user.check_password(serializer.data['password']):
                 return Response({"status":400,"data":"Invalid credentials"},status=HTTP_400_BAD_REQUEST)
             

@@ -162,7 +162,7 @@ class Audit(models.Model):
         ('CLOSED', 'Closed')
     ]
     remark = models.CharField(max_length=64,null=True, blank=True)
-    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL,null=True,blank=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     auditor = models.ForeignKey('account.User', on_delete=models.CASCADE)
     audit_date = models.DateTimeField(default=timezone.now)

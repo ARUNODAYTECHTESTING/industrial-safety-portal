@@ -185,4 +185,4 @@ class PerformAuditSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = equipment_models.Audit
-        fields = ["name","equipment","latitude","longitude"]
+        fields = ["remark","equipment","latitude","longitude"]

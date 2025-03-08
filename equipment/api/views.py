@@ -29,6 +29,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from django.db.models import Q
 import logging
+from equipment import service as equipment_service
 
 logger = logging.getLogger(__name__)
 from account import permissions as account_permissions
@@ -899,47 +900,28 @@ class AuditSummary(generics.ListAPIView):
         'approve_status',
     ]
 
-    @swagger_auto_schema(
-        tags=['Audit'],
-        operation_summary="Comprehensive Audit Overview",
-        operation_description="Retrieve detailed audit statistics including total audits, compliance score, and status breakdown"
-    )
-    def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-
-        # Apply any filters from the request
-        group_names = request.user.groups.values_list('name', flat=True)
-        if set(group_names).intersection({"Auditor", "Auditors"}):
-            queryset = queryset.filter(owner=request.user)
-        else:
-            user_id = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("user_id", flat=True)
-            queryset = queryset.filter(owner__in=user_id)
-
-        # Total Audits Completed
-        total_audits = queryset.count()
+    def get_daily_data(self,queryset):
+        # Daily Audit Summary
+        today = timezone.now().date()
+        daily_queryset = queryset.filter(created_at__date = today)
+        daily_total = daily_queryset.count()
+        daily_approved = daily_queryset.filter(approve_status='approved').count()
+        daily_compliance = (daily_approved / daily_total * 100) if daily_total > 0 else 0
         
-        # Pending Audits
-        pending_audits = queryset.filter(request_status='open').count()
-        
-        # Compliance Score Calculation
-        total_observations = queryset.count()
-        approved_observations = queryset.filter(approve_status='approved').count()
-        compliance_score = (approved_observations / total_observations * 100) if total_observations > 0 else 0
-        
-        # Detailed Status Breakdown
-        status_breakdown = {
-            'pending': queryset.filter(request_status='open').count(),
-            'ongoing': queryset.filter(request_status='in-progress').count(),
-            'complete': queryset.filter(request_status='closed').count(),
-        }
-        
-        # Pass vs Fail Breakdown
-        pass_fail_breakdown = {
-            'passed': queryset.filter(approve_status='approved').count(),
-            'rejected': queryset.filter(approve_status='rejected').count(),
-            'pending_review': queryset.filter(approve_status='pending').count()
-        }
-        
+        daily_summary = {
+            'total_audits': daily_total,
+            'passed': daily_approved,
+            'rejected': daily_queryset.filter(approve_status='rejected').count(),
+            'pending_review': daily_queryset.filter(approve_status='pending').count(),
+            'compliance_score': round(daily_compliance, 2),
+            'status_breakdown': {
+                'pending': daily_queryset.filter(request_status='open').count(),
+                'ongoing': daily_queryset.filter(request_status='in-progress').count(),
+                'complete': daily_queryset.filter(request_status='closed').count(),
+            }
+            }
+        return daily_summary
+    def get_weekly_data(self, queryset):
         # Weekly Audit Summary
         today = timezone.now().date()
         week_start = today - timezone.timedelta(days=today.weekday())
@@ -961,28 +943,12 @@ class AuditSummary(generics.ListAPIView):
                 'ongoing': weekly_queryset.filter(request_status='in-progress').count(),
                 'complete': weekly_queryset.filter(request_status='closed').count(),
             }
-        }
-        
-        # Daily Audit Summary
-        daily_queryset = queryset.filter(created_at__date=today)
-        daily_total = daily_queryset.count()
-        daily_approved = daily_queryset.filter(approve_status='approved').count()
-        daily_compliance = (daily_approved / daily_total * 100) if daily_total > 0 else 0
-        
-        daily_summary = {
-            'total_audits': daily_total,
-            'passed': daily_approved,
-            'rejected': daily_queryset.filter(approve_status='rejected').count(),
-            'pending_review': daily_queryset.filter(approve_status='pending').count(),
-            'compliance_score': round(daily_compliance, 2),
-            'status_breakdown': {
-                'pending': daily_queryset.filter(request_status='open').count(),
-                'ongoing': daily_queryset.filter(request_status='in-progress').count(),
-                'complete': daily_queryset.filter(request_status='closed').count(),
             }
-        }
-        
+        return weekly_summary
+    
+    def get_monthly_data(self, queryset):
         # Monthly Audit Summary
+        today = timezone.now().date()
         month_start = today.replace(day=1)
         next_month_start = (month_start + timezone.timedelta(days=32)).replace(day=1)
         
@@ -1002,19 +968,65 @@ class AuditSummary(generics.ListAPIView):
                 'ongoing': monthly_queryset.filter(request_status='in-progress').count(),
                 'complete': monthly_queryset.filter(request_status='closed').count(),
             }
+            }
+        return monthly_summary
+    def calculate_compliance_score(self, queryset):
+        total_observations = queryset.count()
+        approved_observations = queryset.filter(approve_status='approved').count()
+        compliance_score = (approved_observations / total_observations * 100) if total_observations > 0 else 0
+        return compliance_score
+
+    def get_status_breakdown(self, queryset):
+        status_breakdown = {
+            'pending': queryset.filter(request_status='open').count(),
+            'ongoing': queryset.filter(request_status='in-progress').count(),
+            'complete': queryset.filter(request_status='closed').count(),
         }
-        
+        return status_breakdown
+    
+    def get_pass_fail_breakdown(self, queryset):
+        pass_fail_breakdown = {
+            'passed': queryset.filter(approve_status='approved').count(),
+            'rejected': queryset.filter(approve_status='rejected').count(),
+            'pending_review': queryset.filter(approve_status='pending').count()
+        }
+        return pass_fail_breakdown
+    
+    def get_total_audits(self, queryset):
+        total_audits = queryset.count()
+        return total_audits
+    
+    def get_pending_audits(self, queryset):
+        pending_audits = queryset.filter(request_status='open').count()
+        return pending_audits
+    
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Comprehensive Audit Overview",
+        operation_description="Retrieve detailed audit statistics including total audits, compliance score, and status breakdown"
+    )
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # Apply any filters from the request
+        group_names = request.user.groups.values_list('name', flat=True)
+        if set(group_names).intersection({"Auditor", "Auditors"}):
+            queryset = queryset.filter(owner=request.user)
+        else:
+            user_id = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user).values_list("user_id", flat=True)
+            queryset = queryset.filter(owner__in=user_id)
+        print(f"queryset found: {queryset}")
         return Response({
             'summary_cards': {
-                'total_audits': total_audits,
-                'pending_audits': pending_audits,
-                'compliance_score': round(compliance_score, 2),
-                'pass_fail_ratio': pass_fail_breakdown
+                'total_audits': self.get_total_audits(queryset),
+                'pending_audits': self.get_pending_audits(queryset),
+                'compliance_score': round(self.calculate_compliance_score(queryset), 2),
+                'pass_fail_ratio': self.get_pass_fail_breakdown(queryset)
             },
-            'status_breakdown': status_breakdown,
-            'weekly_summary': weekly_summary,
-            'daily_summary': daily_summary,
-            'monthly_summary': monthly_summary
+            'status_breakdown': self.get_status_breakdown(queryset),
+            'weekly_summary': self.get_weekly_data(queryset),
+            'daily_summary': self.get_daily_data(queryset),
+            'monthly_summary': self.get_monthly_data(queryset)
         })
 
 class NotificationSummary(generics.ListAPIView):
@@ -1226,4 +1238,46 @@ class AuditorAuditSummary(generics.ListAPIView):
             # 'overall_performance_summary': overall_performance_summary
         })
     
+class PerformAuditView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = equipment_serializers.PerformAuditSerializer
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Create audit",
+        operation_description="Create a new audit for the specified equipment."
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            equipment = equipment_query.EquipmentQuery().get_object(request.data.get('equipment'))
+            if equipment is None:
+                return Response({"status":404,"message":"Equipment not found"},status=404)
+            # TODO: Verify location proximity
+            is_valid_location = equipment_service.EquipmentService.verify_equipment_location(
+            request.data.get('equipment'), 
+            request.data.get('latitude'), 
+            request.data.get('longitude')
+            )
+            if not is_valid_location:
+                return Response({"status":400,"data":"You must be within proximity of the equipment"},status=400)
 
+            # TODO:Find the corresponding schedule
+            schedule = equipment_query.ScheduleQuery().get_schedule_by_equipment(equipment_id=request.data.get('equipment'),user_id = request.user.id,date = timezone.now())
+            if schedule is None:
+                return Response({"status":404,"data":"No schedule found for the equipment and date"},status=404)
+            
+            # TODO: Create the audit record directly linked to equipment
+            audit = equipment_models.Audit.objects.create(
+                equipment=equipment,
+                schedule=schedule,
+                auditor=request.user
+            )
+            return Response({"status": 200, "data":"Audit created successfully"}, status=200)
+        except Exception as e:
+            return Response({"status": 400, "data":str(e)}, status=400)
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Get audit",
+        operation_description="Get an audit by its ID."
+    )
+    def get(self, request, *args, **kwargs):
+        pass

@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
-
+from equipment import models as equipment_models
 
 class UserManager(BaseUserManager):
     """
@@ -26,6 +26,10 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
+        extra_fields.setdefault("plant", equipment_models.Plant.objects.first())
+        extra_fields.setdefault("line", equipment_models.Line.objects.first())
+        extra_fields.setdefault("station", equipment_models.Station.objects.first())
+
 
 
         if extra_fields.get("is_staff") is not True:

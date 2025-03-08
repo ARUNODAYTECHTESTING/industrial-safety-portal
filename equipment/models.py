@@ -161,7 +161,7 @@ class Audit(models.Model):
         ('VERIFIED', 'Verified'),
         ('CLOSED', 'Closed')
     ]
-    name = models.CharField(max_length=64)
+    remark = models.CharField(max_length=64,null=True, blank=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     auditor = models.ForeignKey('account.User', on_delete=models.CASCADE)
@@ -169,10 +169,10 @@ class Audit(models.Model):
     audit_status = models.CharField(max_length=24, choices=STATUS_CHOICES, default='OPEN')
     audit_attempt = models.IntegerField(default=1)
     parent_audit = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='follow_up_audits')
-    
+    checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE,related_name="audits")
+    is_ok = models.BooleanField(default=True)
     def __str__(self):
         return f"{self.equipment.name} - Attempt {self.audit_attempt} - {self.audit_date.strftime('%Y-%m-%d')}"
-    
     @property
     def is_reopened(self):
         return self.audit_attempt > 1
@@ -195,10 +195,10 @@ class Observation(shared_models.TimeStamp):
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     )
-    name = models.CharField(max_length=64)
-    checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE)
+    name = models.CharField(max_length=64,null=True, blank=True)
+    checkpoint = models.ForeignKey(Checkpoint,on_delete=models.SET_NULL,null=True, blank=True)
     image = models.ImageField(upload_to = 'observation/',null=True,blank=True)
-    attempt = models.PositiveBigIntegerField(null=True, blank=True)
+    attempt = models.PositiveBigIntegerField(default=1)
     category = models.CharField(max_length=64,null=True,blank=True)
     corrective_remark = models.CharField(max_length=64,null=True,blank=True)
     owner = models.ForeignKey("account.User",related_name="observations",on_delete=models.SET_NULL,null=True)

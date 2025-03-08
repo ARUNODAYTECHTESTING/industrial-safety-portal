@@ -8,33 +8,36 @@ from equipment import models as equipment_models
 from django.utils.dateparse import parse_date
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-
+from account import managers
+from django.utils import timezone
+from datetime import timedelta
 class Command(BaseCommand):
     help = "Load dummy data into the database"
 
     def handle(self, *args, **kwargs):
-        self.setup_permissions()
-
-        self.create_dummy_departments()
-        self.create_dummy_plant()
-        self.create_dummy_line()
-        self.create_dummy_station()
-        self.create_dummy_equipment_type()
-        self.create_dummy_equipment()
-        self.create_dummy_audit_parameter()
-        self.create_dummy_shedule_type()
-        
-        self.dump_dummy_users_into_database()
-        self.create_dummy_checkpoint()
-        self.create_dummy_observation()
-        self.create_dummy_shedule()
+        try:
+            self.setup_permissions()
+            self.create_dummy_departments()
+            self.create_dummy_plant()
+            self.create_dummy_line()
+            self.create_dummy_station()
+            self.create_dummy_equipment_type()
+            self.create_dummy_equipment()
+            self.create_dummy_audit_parameter()
+            self.create_dummy_shedule_type()
+            self.dump_dummy_users_into_database()
+            self.create_dummy_checkpoint()
+            self.create_dummy_shedule()
+        except Exception as e:
+            self.stderr.write(self.style.ERROR(f"Error occurred while loading dummy data: {str(e)}"))
         self.stdout.write(self.style.SUCCESS("Dummy data loaded successfully!"))
 
 
     def setup_permissions(self):
         """Set up permissions for different user groups"""
         permission_mapping = {
-            'Super Admin': {
+             'Portal Admin': {
+                equipment_models.Plant: ['add', 'change', 'delete', 'view'],
                 account_models.Department: ['add', 'change', 'delete', 'view'],
                 equipment_models.Line: ['add', 'change', 'delete', 'view'],
                 equipment_models.Station: ['add', 'change', 'delete', 'view'],
@@ -43,8 +46,7 @@ class Command(BaseCommand):
                 equipment_models.MasterAuditParameter: ['add', 'change', 'delete', 'view'],
                 account_models.User: ['add', 'change', 'delete', 'view'],  # Added User permissions
             },
-            'Portal Admin': {
-                equipment_models.Plant: ['add', 'change', 'delete', 'view'],
+            'Super Admin': {
                 account_models.Department: ['add', 'change', 'delete', 'view'],
                 equipment_models.Line: ['add', 'change', 'delete', 'view'],
                 equipment_models.Station: ['add', 'change', 'delete', 'view'],
@@ -115,16 +117,13 @@ class Command(BaseCommand):
             account_models.Department.objects.get_or_create(id=item["id"],name=item.get("name"))
 
 
-    # def create_dummy_user_type(self):
-    #     data = self.load_json_data("user_types.json")
-    #     for item in data:
-    #         Group.objects.get_or_create(name=item.get("name"))
+    
 
     def create_dummy_plant(self):
         data = self.load_json_data("plants.json")
         for item in data:
             equipment_models.Plant.objects.get_or_create(id=item.get("id"), name=item.get("name"))
-
+        print("plants created successfully!")
     def create_dummy_line(self):
         data = self.load_json_data("lines.json")
         for item in data:
@@ -134,7 +133,7 @@ class Command(BaseCommand):
                 )
             except Exception:
                 continue
-
+        print("Line created successfully!")
     def create_dummy_station(self):
         data = self.load_json_data("stations.json")
         for item in data:
@@ -144,7 +143,7 @@ class Command(BaseCommand):
                 )
             except Exception:
                 continue
-
+        print("Station created successfully!")
     def create_dummy_equipment_type(self):
         data = self.load_json_data("equipment_types.json")
         for item in data:
@@ -152,7 +151,7 @@ class Command(BaseCommand):
                 equipment_models.EquipmentType.objects.get_or_create(id=item.get("id"), name=item.get("name"))
             except Exception:
                 continue
-
+        print("Equipment Type created successfully!")
     def create_dummy_equipment(self):
         data = self.load_json_data("equipments.json")
         for item in data:
@@ -167,7 +166,7 @@ class Command(BaseCommand):
                 )
             except Exception:
                 continue
-
+        print("Equipment created successfully!")
     def create_dummy_audit_parameter(self):
         data = self.load_json_data("audit_parameters.json")
         for item in data:
@@ -175,7 +174,7 @@ class Command(BaseCommand):
                 equipment_models.MasterAuditParameter.objects.get_or_create(id=item.get("id"), name=item.get("name"))
             except Exception:
                 continue
-
+        print("Audit Parameter created successfully!")
     def create_dummy_checkpoint(self):
         data = self.load_json_data("checkpoints.json")
         for item in data:
@@ -188,7 +187,7 @@ class Command(BaseCommand):
             except Exception:
                 continue
 
-   
+        print("Checkpoint created successfully!")
     def create_dummy_observation(self):
         data = self.load_json_data("observations.json")
         for item in data:
@@ -210,11 +209,12 @@ class Command(BaseCommand):
             except Exception as e:
                 print(f"Error creating observation: {e}")
                 continue
+        print("Observation created successfully!")
     def dump_dummy_users_into_database(self):
         data = self.load_json_data("users.json")
         for item in data:
             try:
-               account_models.User.objects.create(
+                user = account_models.User.objects.create(
                 id=item.get("id"),
                 name=item.get("name"),
                 password=account_utils.PasswordManager.hash_password(item.get("password")),
@@ -225,11 +225,13 @@ class Command(BaseCommand):
                 email=item.get("email"),
                 phone=item.get("phone"),
                 token_id=item.get("token"),
-                manage_by_id=account_models.User.objects.filter().first().id
+                manage_by_id=item.get("manage_by",None),
                 )
-
+                group = Group.objects.get(id=item.get("user_type"))
+                group.user_set.add(user)
             except Exception as e:
                 print(f"Register users error : {e}")
+        print("Users created successfully!")
     def create_dummy_shedule_type(self):
         data = self.load_json_data("shedule_types.json")
         for item in data:
@@ -237,17 +239,18 @@ class Command(BaseCommand):
     
     def create_dummy_shedule(self):
         data = self.load_json_data("shedules.json")
-        print("scheduel ---------------------------------------------------------")
         for item in data:
-           
+            assigned_by = account_models.User.objects.get(id=item["assigned_by"])
             equipment_models.Schedule.objects.get_or_create(
                 user_id=item["user"],
                 equipment_id=item["equipment"],
-                plant_id=item["plant"],
-                department_id=item["department"],
+                plant_id=assigned_by.plant.id,
+                department_id=assigned_by.department.id,
                 line_id=item["line"],
                 station_id=item["station"],
                 schedule_type_id=item["schedule_type"],
-                assigned_by_id = item["assigned_by"]
+                assigned_by_id = assigned_by.id,
+                schedule_date  = timezone.now(),
+                fullfillment_date = timezone.now() + timedelta(days=5)
             )
-    
+        print("Schedules created successfully!")

@@ -14,6 +14,5 @@ def update_user_bulk_password_from_json(file_path = None):
             user_obj = account_models.User.objects.get(email=user['email'])
             user_obj.plain_password = user['password']
             user_obj.save()
-            print(f"Password updated for user with ID {user_obj.id}")
         except account_models.User.DoesNotExist:
             print(f"User with ID {user['id']} not found.")

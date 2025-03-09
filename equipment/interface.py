@@ -21,6 +21,9 @@ class ISchedule(abc.ABC):
     @abc.abstractmethod
     def get_schedule_by_equipment(self, equipment_id,user_id) -> object:
         pass
+    @abc.abstractmethod
+    def get_schedule_by_assigner_or_auditor(self, assigner_or_auditor):
+        pass
 
 class IEquipment(abc.ABC):
     @abc.abstractmethod

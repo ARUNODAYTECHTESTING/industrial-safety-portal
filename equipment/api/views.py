@@ -30,6 +30,7 @@ from drf_yasg.utils import swagger_auto_schema
 from django.db.models import Q
 import logging
 from equipment import service as equipment_service
+from django.core.exceptions import PermissionDenied
 
 logger = logging.getLogger(__name__)
 from account import permissions as account_permissions
@@ -325,8 +326,6 @@ class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         pass
 
-
-
 class ScheduleTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = equipment_serializers.ScheduleTypeSerializer
@@ -392,7 +391,8 @@ class ScheduleView(generics.ListCreateAPIView):
         if set(group_names).intersection({"Auditor", "Auditors"}):
             self.queryset = self.queryset.filter(user=request.user)
         else:
-            self.queryset = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user)
+            self.queryset = equipment_query.ScheduleQuery().get_schedule_by_assigner_or_auditor(request.user)
+        
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -1271,7 +1271,9 @@ class PerformAuditView(generics.ListCreateAPIView):
                 checkpoint = checkpoint,
                 equipment=checkpoint.equipment,
                 schedule=schedule,
-                auditor=request.user
+                auditor=request.user,
+                is_ok=request.data.get('is_ok'),
+                remark=request.data.get('remark',None)
             )
             return Response({"status": 200, "data":"Audit created successfully"}, status=200)
         except Exception as e:
@@ -1292,3 +1294,24 @@ class PerformAuditView(generics.ListCreateAPIView):
             self.queryset = self.queryset.filter(auditor_id__in=auditor_ids)
 
             return super().get(request, *args, **kwargs)
+
+class PerformAuditDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = equipment_serializers.PerformAuditDetailSerializer
+    queryset = equipment_models.Audit.objects.all()
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Update audit",
+        operation_description="Update an audit by its ID.",
+    )
+    def perform_update(self, serializer):
+        print(f"Audit update: {serializer.validated_data}")  # Log validated data instead of raw serializer data
+        audit = self.get_object()
+        assigned_by = getattr(audit.schedule, "assigned_by", None)
+        if self.request.user == assigned_by:
+            serializer.save()
+            audit.refresh_from_db()
+        else:
+            raise PermissionDenied("You do not have permission to perform this action")
+
+        

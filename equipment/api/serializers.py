@@ -193,3 +193,13 @@ class PerformAuditSerializer(serializers.ModelSerializer):
         representation['checkpoint'] = CheckPointSerializer(instance.checkpoint).data
         return representation
  
+class PerformAuditDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = equipment_models.Audit
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['checkpoint'] = CheckPointSerializer(instance.checkpoint).data
+        return representation

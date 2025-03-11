@@ -932,7 +932,7 @@ class AuditSummary(generics.ListAPIView):
             count = queryset.filter(created_at__date=current_date).count()
             last_week_day_wise_audits[date_key] = count
         return last_week_day_wise_audits
-    def get_next_week_day_wise_audits(self, week_end, queryset):
+    def get_current_week_day_wise_audits(self, week_end, queryset):
         next_week_day_wise_audits = {}
         next_week_start = week_end + timezone.timedelta(days=1)  # Start from the day after current week ends
         
@@ -968,7 +968,7 @@ class AuditSummary(generics.ListAPIView):
                 'complete': weekly_queryset.filter(request_status='closed').count(),
             },
             "last_week": self.get_last_week_day_wise_audits(week_start,queryset),
-            "current_week": self.get_next_week_day_wise_audits(week_end, queryset)
+            "current_week": self.get_current_week_day_wise_audits(week_end, queryset)
 
         }
         return weekly_summary
@@ -996,42 +996,41 @@ class AuditSummary(generics.ListAPIView):
 
         return last_month_day_wise_audits
 
-
-    def get_next_month_day_wise_audits(self, queryset):
-        # Get current month's info
-        today = timezone.now().date()
-        current_month_start = today.replace(day=1)
+    def get_current_month_day_wise_audits(self, queryset, reference_date=None):
+        # Use reference_date if provided, otherwise use today
+        reference_date = reference_date or timezone.now().date()
         
-        # Calculate next month's start (which should be the coming month, not skipping one)
+        # Get current month's start date based on the reference date
+        current_month_start = reference_date.replace(day=1)
+        
+        # Calculate current month's end date
         if current_month_start.month == 12:
-            next_month_start = current_month_start.replace(year=current_month_start.year + 1, month=1)
+            current_month_end = current_month_start.replace(year=current_month_start.year + 1, month=1, day=1) - timezone.timedelta(days=1)
         else:
-            next_month_start = current_month_start.replace(month=current_month_start.month + 1)
+            # Use calendar module to get the last day of the current month
+            import calendar
+            _, last_day = calendar.monthrange(current_month_start.year, current_month_start.month)
+            current_month_end = current_month_start.replace(day=last_day)
         
-        # Calculate the last day of the next month
-        if next_month_start.month == 12:
-            next_month_end = next_month_start.replace(year=next_month_start.year + 1, month=1, day=1) - timezone.timedelta(days=1)
-        else:
-            next_month_end = next_month_start.replace(month=next_month_start.month + 1, day=1) - timezone.timedelta(days=1)
         
-        next_month_day_wise_audits = {}
-        current_date = next_month_start
+        current_month_day_wise_audits = {}
+        current_date = current_month_start
         
-        # Iterate through each day of the next month
-        while current_date <= next_month_end:
+        # Iterate through each day of the current month
+        while current_date <= current_month_end:
             date_key = current_date.strftime('%Y-%m-%d')
             
             # For future dates, we won't have audit data yet
-            if current_date <= today:
+            if current_date <= timezone.now().date():
                 count = queryset.filter(created_at__date=current_date).count()
             else:
                 count = 0
-                
-            next_month_day_wise_audits[date_key] = count
+            
+            current_month_day_wise_audits[date_key] = count
             
             current_date += timezone.timedelta(days=1)
-            
-        return next_month_day_wise_audits
+        
+        return current_month_day_wise_audits
 
     def get_monthly_data(self, queryset):
         # Monthly Audit Summary
@@ -1057,7 +1056,7 @@ class AuditSummary(generics.ListAPIView):
                 'complete': monthly_queryset.filter(request_status='closed').count(),
             },
             'last_month_day_wise_audits': self.get_last_month_day_wise_audits(queryset),
-            'next_month_day_wise_audits': self.get_next_month_day_wise_audits(queryset)
+            'current_month_day_wise_audits': self.get_current_month_day_wise_audits(queryset)
         }
         return monthly_summary
 

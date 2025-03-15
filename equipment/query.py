@@ -35,3 +35,7 @@ class EquipmentQuery(equipment_interface.IEquipment):
 class CheckPointQuery(equipment_interface.ICheckPoint):
     def get_object(self, id):
         return equipment_models.Checkpoint.objects.filter(id=id).first()
+    
+class AuditQuery(equipment_interface.IAudit):
+    def get_audits_by_equipment_id(self, id):
+        return equipment_models.Audit.objects.filter(equipment_id=id)

@@ -1389,19 +1389,21 @@ class PerformAuditDetailsView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = equipment_serializers.PerformAuditDetailSerializer
     queryset = equipment_models.Audit.objects.all()
+    
     @swagger_auto_schema(
         tags=['Audit'],
         operation_summary="Update audit",
         operation_description="Update an audit by its ID.",
     )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
     def perform_update(self, serializer):
-        print(f"Audit update: {serializer.validated_data}")  # Log validated data instead of raw serializer data
         audit = self.get_object()
         assigned_by = getattr(audit.schedule, "assigned_by", None)
         if self.request.user == assigned_by:
             serializer.save()
-            audit.refresh_from_db()
+            
         else:
             raise PermissionDenied("You do not have permission to perform this action")
-
-        
+    

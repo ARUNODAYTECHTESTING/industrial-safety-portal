@@ -38,3 +38,8 @@ class ICheckPoint(abc.ABC):
     @abc.abstractmethod
     def get_object(self, id) -> object:
         pass
+
+class IAudit(abc.ABC):
+    @abc.abstractmethod
+    def get_audits_by_equipment_id(self, id) -> object:
+        pass

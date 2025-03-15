@@ -1345,8 +1345,8 @@ class PerformAuditView(generics.ListCreateAPIView):
             # TODO: Verify location proximity
             is_valid_location = equipment_service.EquipmentService.verify_equipment_location(
             checkpoint.equipment.id, 
-            request.data.get('latitude'), 
-            request.data.get('longitude')
+            round(float(request.data.get('latitude')), 2), 
+            round(float(request.data.get('longitude')), 2)
             )
             if not is_valid_location:
                 return Response({"status":400,"data":"You must be within proximity of the equipment"},status=400)

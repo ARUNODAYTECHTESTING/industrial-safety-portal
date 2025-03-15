@@ -1353,8 +1353,6 @@ class PerformAuditView(generics.ListCreateAPIView):
 
             # TODO:Find the corresponding schedule
             schedule = equipment_query.ScheduleQuery().get_schedule_by_equipment(equipment_id=checkpoint.equipment.id,user_id = request.user.id)
-            if schedule is None:
-                return Response({"status":404,"data":"No schedule found for the equipment and date"},status=404)
             
             # TODO: Create the audit record directly linked to equipment
             audit = equipment_models.Audit.objects.create(

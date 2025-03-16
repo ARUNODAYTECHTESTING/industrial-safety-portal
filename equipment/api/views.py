@@ -582,7 +582,7 @@ class ObservationApiView(generics.ListCreateAPIView):
     )
     def get(self, request, *args, **kwargs):
         if account_permissions.RoleManager(request.user).is_auditor():
-            self.queryset = self.queryset.filter(owner=request.user)
+            self.queryset = self.queryset.filter(Q(owner=request.user) | Q(action_auditor=request.user))
         
         return super().get(request, *args, **kwargs)
 
@@ -615,10 +615,28 @@ class ObservationDetailsApiView(generics.RetrieveUpdateDestroyAPIView):
         operation_description="Update an existing observation by its ID."
     )
     def perform_update(self, serializer):
+        action_owner = serializer.validated_data.get("action_owner",None)
+        action_auditor = serializer.validated_data.get("action_auditor",None)
+
+        if action_owner is not None:
+
+            if account_permissions.RoleManager(action_owner).is_auditor():
+                raise PermissionDenied("Action owner must not be an auditor")
+
+            elif action_owner.department.name == self.request.user.department.name:
+                raise PermissionDenied("Action owner must be from different department")
+            
+        elif action_auditor is not None:
+            user_type = account_query.GroupQuery().get_user_type_level(self.request.user)
+            user_type_ids = [ut['id'] for ut in user_type]
+            users_id =  account_models.User.objects.filter(groups__id__in=user_type_ids,manage_by = self.request.user).values_list('id',flat=True)
+            if not account_permissions.RoleManager(action_auditor).is_auditor():
+                raise PermissionDenied("Action auditor must be an auditor")
+            elif action_auditor.id not in users_id:
+                raise PermissionDenied("Action auditor must be under action owner")
+
         instance = serializer.save()
-        if instance.action_owner:
-            instance.request_status = "in-progress"
-            instance.save()
+       
 
     @swagger_auto_schema(
         tags=['Observation'],
@@ -1375,7 +1393,7 @@ class PerformAuditView(generics.ListCreateAPIView):
         if account_permissions.RoleManager(request.user).is_auditor():
             self.queryset = self.queryset.filter(auditor=request.user)
         else:
-            schedule_queryset = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user)
+            schedule_queryset = equipment_query.ScheduleQuery().get_schedule_by_assigner_or_auditor(request.user)
             
             auditor_ids = list(schedule_queryset.values_list('user_id', flat=True).distinct())
             
@@ -1387,19 +1405,30 @@ class PerformAuditDetailsView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = equipment_serializers.PerformAuditDetailSerializer
     queryset = equipment_models.Audit.objects.all()
+    
     @swagger_auto_schema(
         tags=['Audit'],
         operation_summary="Update audit",
         operation_description="Update an audit by its ID.",
     )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
     def perform_update(self, serializer):
-        print(f"Audit update: {serializer.validated_data}")  # Log validated data instead of raw serializer data
         audit = self.get_object()
         assigned_by = getattr(audit.schedule, "assigned_by", None)
+        approve_status = serializer.validated_data.get("approve_status",None)
+
         if self.request.user == assigned_by:
-            serializer.save()
-            audit.refresh_from_db()
+            if approve_status is not None and approve_status == "APPROVED":
+                print("--------------------1")
+                serializer.save(request_status="CLOSED")
+
+            elif approve_status is not None and approve_status == "REJECTED":
+                print("--------------------2")
+
+                serializer.save(request_status="OPEN")
+
         else:
             raise PermissionDenied("You do not have permission to perform this action")
-
-        
+    

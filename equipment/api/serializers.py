@@ -185,8 +185,8 @@ class PerformAuditSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = equipment_models.Audit
-        fields = ["id","is_ok","remark","checkpoint","latitude","longitude"]
-        extra_kwargs = {"remark": {"read_only": True}}  
+        fields = ["id","is_ok","remark","checkpoint","latitude","longitude","request_status","approve_status"]
+        extra_kwargs = {"remark": {"read_only": True},"request_status": {"read_only": True},"approve_status": {"read_only": True}}  
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

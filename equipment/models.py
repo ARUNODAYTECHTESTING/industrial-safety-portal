@@ -64,6 +64,12 @@ class EquipmentType(shared_models.TimeStamp):
 
 
 class Equipment(shared_models.TimeStamp):
+    EQUIPMENT_STATUS = (
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('PARTIAL COMPLETED','Partial Completed'),
+        ('REJECTED','Rejected')
+    )
     name = models.CharField(max_length=64,unique=True)
     equipment_type = models.ForeignKey(EquipmentType,on_delete=models.CASCADE)
     plant = models.ForeignKey(Plant,on_delete=models.CASCADE,related_name="equipment")
@@ -74,6 +80,7 @@ class Equipment(shared_models.TimeStamp):
     sheet = models.CharField(max_length=64)
     location_coordinates = models.CharField(max_length=100, help_text="Latitude,Longitude",null=True, blank=True)
     location_radius = models.IntegerField(default=10, help_text="Radius in meters for QR validation",null=True, blank=True)
+    status = models.CharField(choices=EQUIPMENT_STATUS,max_length=32,default="PENDING")
     def __str__(self):
        return self.name
 
@@ -98,8 +105,8 @@ class ScheduleType(shared_models.TimeStamp):
 
 class Schedule(shared_models.TimeStamp):
     SCHEDULE_STATUS = (
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
     )
     user = models.ForeignKey('account.User',on_delete=models.CASCADE,related_name="schedule")
     equipment = models.ForeignKey(Equipment,on_delete=models.CASCADE)
@@ -113,7 +120,7 @@ class Schedule(shared_models.TimeStamp):
     assigned_by = models.ForeignKey("account.User",on_delete=models.CASCADE,related_name="owner_schedule")
     # TODO: update full fillment once observation created
     fullfillment_date = models.DateTimeField(null=True,blank=True)
-    status = models.CharField(max_length=10, choices=SCHEDULE_STATUS, default='pending')
+    status = models.CharField(max_length=10, choices=SCHEDULE_STATUS, default='PENDING')
 
     def save(self, *args, **kwargs):
         if self.pk is None:
@@ -154,45 +161,42 @@ class Checkpoint(shared_models.TimeStamp):
 
 # TODO: latest changes
 class Audit(models.Model):
-    STATUS_CHOICES = [
+    REQUEST_STATUS_CHOICES = [
         ('OPEN', 'Open'),
-        ('IN_PROGRESS', 'In Progress'),
-        ('COMPLETED', 'Completed'),
-        ('VERIFIED', 'Verified'),
+        ('IN PROGRESS', 'In Progress'),
         ('CLOSED', 'Closed')
     ]
+    APPROVED_STATUS_COICES = (
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    )
     remark = models.CharField(max_length=64,null=True, blank=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL,null=True,blank=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.SET_NULL,null=True,blank=True)
     auditor = models.ForeignKey('account.User', on_delete=models.CASCADE)
     audit_date = models.DateTimeField(default=timezone.now)
-    audit_status = models.CharField(max_length=24, choices=STATUS_CHOICES, default='OPEN')
+    request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_CHOICES, default='OPEN')
+    approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICES,default='PENDING')   
     audit_attempt = models.IntegerField(default=1)
     checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE,related_name="audits")
     is_ok = models.BooleanField(default=True)
     def __str__(self):
         return f"{self.equipment.name} - Attempt {self.audit_attempt} - {self.audit_date.strftime('%Y-%m-%d')}"
-    @property
-    def is_reopened(self):
-        return self.audit_attempt > 1
-    
-    @property
-    def has_open_observations(self):
-        return self.observations.filter(status__in=['OPEN', 'IN_PROGRESS']).exists()
 
+    
 
 class Observation(shared_models.TimeStamp):
     # Open resolved closed
-    REQUEST_STATUS_COICE = (
-        ('open', 'Open'),
-        ('in-progress', 'In-Progress'),
-        ('closed', 'Closed'),
-    )
-
-    APPROVED_STATUS_COICE = (
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+    REQUEST_STATUS_CHOICES = [
+        ('OPEN', 'Open'),
+        ('IN PROGRESS', 'In Progress'),
+        ('CLOSED', 'Closed')
+    ]
+    APPROVED_STATUS_COICES = (
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
     )
     name = models.CharField(max_length=64,null=True, blank=True)
     checkpoint = models.ForeignKey(Checkpoint,on_delete=models.SET_NULL,null=True, blank=True)
@@ -204,8 +208,8 @@ class Observation(shared_models.TimeStamp):
     department = models.ForeignKey("account.Department",related_name="observations",on_delete=models.SET_NULL,null=True)
     plant = models.ForeignKey(Plant,related_name="observations",on_delete=models.SET_NULL,null=True)
     remark = models.TextField(null=True,blank=True)
-    request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_COICE, default='open')
-    approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICE,default='pending')
+    request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_CHOICES, default='OPEN')
+    approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICES,default='PENDING') 
     # TODO: Action owner / not disclose
     target_date = models.DateTimeField(null=True, blank=True)
     # TODO: once observatiob get approved tasrget_complete_date will be add
@@ -214,6 +218,8 @@ class Observation(shared_models.TimeStamp):
     schedule = models.ForeignKey(Schedule, related_name="observations", on_delete=models.SET_NULL,null=True)
     # TODO: Action owner
     action_owner = models.ForeignKey("account.User", related_name="action_owner_observations", on_delete=models.SET_NULL, null=True)
+    action_auditor = models.ForeignKey("account.User", related_name="action_auditor_observations", on_delete=models.SET_NULL, null=True)
+
     audit = models.ForeignKey(Audit, on_delete=models.CASCADE,related_name="observation")
     def save(self, *args, **kwargs):
         if self.pk is None:

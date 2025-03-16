@@ -1377,7 +1377,7 @@ class PerformAuditView(generics.ListCreateAPIView):
         if account_permissions.RoleManager(request.user).is_auditor():
             self.queryset = self.queryset.filter(auditor=request.user)
         else:
-            schedule_queryset = equipment_query.ScheduleQuery().get_schedule_assigned_by(request.user)
+            schedule_queryset = equipment_query.ScheduleQuery().get_schedule_by_assigner_or_auditor(request.user)
             
             auditor_ids = list(schedule_queryset.values_list('user_id', flat=True).distinct())
             
@@ -1401,9 +1401,18 @@ class PerformAuditDetailsView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         audit = self.get_object()
         assigned_by = getattr(audit.schedule, "assigned_by", None)
+        approve_status = serializer.validated_data.get("approve_status",None)
+
         if self.request.user == assigned_by:
-            serializer.save()
-            
+            if approve_status is not None and approve_status == "APPROVED":
+                print("--------------------1")
+                serializer.save(request_status="CLOSED")
+
+            elif approve_status is not None and approve_status == "REJECTED":
+                print("--------------------2")
+
+                serializer.save(request_status="OPEN")
+
         else:
             raise PermissionDenied("You do not have permission to perform this action")
     

@@ -80,7 +80,7 @@ class Equipment(shared_models.TimeStamp):
     sheet = models.CharField(max_length=64)
     location_coordinates = models.CharField(max_length=100, help_text="Latitude,Longitude",null=True, blank=True)
     location_radius = models.IntegerField(default=10, help_text="Radius in meters for QR validation",null=True, blank=True)
-    status = models.CharField(choices=EQUIPMENT_STATUS,max_length=32,default="Pending")
+    status = models.CharField(choices=EQUIPMENT_STATUS,max_length=32,default="PENDING")
     def __str__(self):
        return self.name
 
@@ -120,7 +120,7 @@ class Schedule(shared_models.TimeStamp):
     assigned_by = models.ForeignKey("account.User",on_delete=models.CASCADE,related_name="owner_schedule")
     # TODO: update full fillment once observation created
     fullfillment_date = models.DateTimeField(null=True,blank=True)
-    status = models.CharField(max_length=10, choices=SCHEDULE_STATUS, default='pending')
+    status = models.CharField(max_length=10, choices=SCHEDULE_STATUS, default='PENDING')
 
     def save(self, *args, **kwargs):
         if self.pk is None:
@@ -173,11 +173,11 @@ class Audit(models.Model):
     )
     remark = models.CharField(max_length=64,null=True, blank=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL,null=True,blank=True)
-    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    schedule = models.ForeignKey(Schedule, on_delete=models.SET_NULL,null=True,blank=True)
     auditor = models.ForeignKey('account.User', on_delete=models.CASCADE)
     audit_date = models.DateTimeField(default=timezone.now)
-    request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_CHOICES, default='open')
-    approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICES,default='pending')   
+    request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_CHOICES, default='OPEN')
+    approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICES,default='PENDING')   
     audit_attempt = models.IntegerField(default=1)
     checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE,related_name="audits")
     is_ok = models.BooleanField(default=True)
@@ -208,8 +208,8 @@ class Observation(shared_models.TimeStamp):
     department = models.ForeignKey("account.Department",related_name="observations",on_delete=models.SET_NULL,null=True)
     plant = models.ForeignKey(Plant,related_name="observations",on_delete=models.SET_NULL,null=True)
     remark = models.TextField(null=True,blank=True)
-    request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_CHOICES, default='Open')
-    approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICES,default='Pending')
+    request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_CHOICES, default='OPEN')
+    approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICES,default='PENDING') 
     # TODO: Action owner / not disclose
     target_date = models.DateTimeField(null=True, blank=True)
     # TODO: once observatiob get approved tasrget_complete_date will be add

@@ -7,7 +7,7 @@
         "station": 1,
         "schedule_type": 1,
         "assigned_by": 1,
-        "status": "pending"
+        "status": "PENDING"
     },
     {
         "id": 2,
@@ -17,7 +17,7 @@
         "station": 1,
         "schedule_type": 2,
         "assigned_by": 2,
-        "status": "pending"
+        "status": "PENDING"
     },
     {
         "id": 3,
@@ -27,7 +27,7 @@
         "station": 1,
         "schedule_type": 3,
         "assigned_by": 3,
-        "status": "pending"
+        "status": "PENDING"
     },
     {
         "id": 4,
@@ -37,7 +37,7 @@
         "station": 1,
         "schedule_type": 4,
         "assigned_by": 4,
-        "status": "pending"
+        "status": "PENDING"
     },
     {
         "id": 5,
@@ -47,7 +47,7 @@
         "station": 1,
         "schedule_type": 5,
         "assigned_by": 5,
-        "status": "pending"
+        "status": "PENDING"
     },
     {
         "id": 6,
@@ -57,7 +57,7 @@
         "station": 1,
         "schedule_type": 5,
         "assigned_by": 6,
-        "status": "pending"
+        "status": "PENDING"
     }
     
 ]

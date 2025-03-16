@@ -19,25 +19,29 @@ def update_schedule_fullfillment_date(sender, instance, **kwargs):
 @receiver(post_save, sender=equipment_models.Audit)
 def create_observation(sender, instance, **kwargs):
     if not instance.is_ok:
-        equipment_models.Observation.objects.create(
-            audit = instance,
-            schedule=instance.schedule,
-            checkpoint=instance.checkpoint,
-            owner=instance.auditor
-        )
+        observation = equipment_models.Observation.objects.filter(audit = instance).first()
+        if not observation:
+            equipment_models.Observation.objects.get_or_create(
+                audit = instance,
+                schedule=instance.schedule,
+                checkpoint=instance.checkpoint,
+                owner=instance.auditor
+            )
 
 @receiver(post_save, sender=equipment_models.Audit)
 def update_equipment_status(sender, instance, **kwargs):
+    print(f"update_equipment_status trigger.................")
     audits =  equipment_query.AuditQuery().get_audits_by_equipment_id(instance.equipment.id)
+    print(f"Audit found : {audits}")
     approve_statuses = [audit.approve_status for audit in audits]
     request_statuses = [audit.request_status for audit in audits]
-
+    print(f"approve_statuses : {approve_statuses}")
+    print(f"request_statuses : {request_statuses}")
     if all(status == 'APPROVED' for status in approve_statuses):
         instance.equipment.status = 'COMPLETED'
-        instance.request_status = "CLOSED"
     elif all(status == 'REJECTED' for status in approve_statuses):
         instance.equipment.status = 'REJECTED'
-    elif any(status == 'Closed' for status in request_statuses):
+    elif any(status == 'CLOSED' for status in request_statuses):
         instance.equipment.status = 'PARTIAL COMPLETED'
     instance.equipment.save()
 

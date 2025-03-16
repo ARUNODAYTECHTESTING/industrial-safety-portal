@@ -582,7 +582,7 @@ class ObservationApiView(generics.ListCreateAPIView):
     )
     def get(self, request, *args, **kwargs):
         if account_permissions.RoleManager(request.user).is_auditor():
-            self.queryset = self.queryset.filter(owner=request.user)
+            self.queryset = self.queryset.filter(Q(owner=request.user) | Q(action_auditor=request.user))
         
         return super().get(request, *args, **kwargs)
 
@@ -615,10 +615,28 @@ class ObservationDetailsApiView(generics.RetrieveUpdateDestroyAPIView):
         operation_description="Update an existing observation by its ID."
     )
     def perform_update(self, serializer):
+        action_owner = serializer.validated_data.get("action_owner",None)
+        action_auditor = serializer.validated_data.get("action_auditor",None)
+
+        if action_owner is not None:
+
+            if account_permissions.RoleManager(action_owner).is_auditor():
+                raise PermissionDenied("Action owner must not be an auditor")
+
+            elif action_owner.department.name == self.request.user.department.name:
+                raise PermissionDenied("Action owner must be from different department")
+            
+        elif action_auditor is not None:
+            user_type = account_query.GroupQuery().get_user_type_level(self.request.user)
+            user_type_ids = [ut['id'] for ut in user_type]
+            users_id =  account_models.User.objects.filter(groups__id__in=user_type_ids,manage_by = self.request.user).values_list('id',flat=True)
+            if not account_permissions.RoleManager(action_auditor).is_auditor():
+                raise PermissionDenied("Action auditor must be an auditor")
+            elif action_auditor.id not in users_id:
+                raise PermissionDenied("Action auditor must be under action owner")
+
         instance = serializer.save()
-        if instance.action_owner:
-            instance.request_status = "in-progress"
-            instance.save()
+       
 
     @swagger_auto_schema(
         tags=['Observation'],

@@ -218,6 +218,8 @@ class Observation(shared_models.TimeStamp):
     schedule = models.ForeignKey(Schedule, related_name="observations", on_delete=models.SET_NULL,null=True)
     # TODO: Action owner
     action_owner = models.ForeignKey("account.User", related_name="action_owner_observations", on_delete=models.SET_NULL, null=True)
+    action_auditor = models.ForeignKey("account.User", related_name="action_auditor_observations", on_delete=models.SET_NULL, null=True)
+
     audit = models.ForeignKey(Audit, on_delete=models.CASCADE,related_name="observation")
     def save(self, *args, **kwargs):
         if self.pk is None:

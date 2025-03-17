@@ -11,6 +11,7 @@ class DepartmentRepository(account_interface.IDepartment):
     def add_department(self, department: str):
         return account_models.Department.objects.create(name = department)
 
+   
 class UserQuery(account_interface.IUser):
     def add_user(self):
         pass
@@ -22,6 +23,10 @@ class UserQuery(account_interface.IUser):
     
     def get_user_by_owner(self,user):
         return list(account_models.User.objects.filter(manage_by=user).values_list("id",flat=True))
+
+    def get_users_excluding_department(self, department: str):
+        return account_models.User.objects.exclude(department__name=department)
+
 class TokenQuery(account_interface.ITokenizer):
 
     def generate_token(self,user:account_models.User) -> str:

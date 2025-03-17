@@ -702,7 +702,7 @@ class FilterDataView(generics.ListAPIView):
             plant = request.GET.get('plant', None)
             line = request.GET.get('line', None)
             station = request.GET.get('station', None)
-            # department = request.GET.get('department', None)
+            department = request.GET.get('department', None)
            
             if plant is not None:
                 
@@ -717,6 +717,11 @@ class FilterDataView(generics.ListAPIView):
                 self.queryset = equipment_models.Station.objects.filter(id=station)
                 self.serializer_class = equipment_serializers.StationSerializer
             
+
+            elif department is not None:
+                self.queryset = account_query.UserQuery().get_users_excluding_department(request.user.department.name)
+                self.serializer_class = account_serializers.UserSerializer
+
             else:
                 user_type = account_query.GroupQuery().get_user_type_level(request.user)
                 user_type_ids = [ut['id'] for ut in user_type]

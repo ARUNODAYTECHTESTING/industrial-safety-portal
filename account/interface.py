@@ -28,6 +28,10 @@ class IUser(ABC):
     def get_user_by_owner(self, user):
         pass
     
+    @abstractmethod
+    def get_users_excluding_department(self, department: str):
+        pass
+    
 class ITokenizer(ABC):
     @abstractmethod
     def generate_token(self):

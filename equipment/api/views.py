@@ -32,6 +32,8 @@ import logging
 from equipment import service as equipment_service
 from django.core.exceptions import PermissionDenied
 
+from shared import utils as shared_utils
+
 logger = logging.getLogger(__name__)
 from account import permissions as account_permissions
 class EquipmentTypeView(generics.ListCreateAPIView):
@@ -1362,15 +1364,14 @@ class PerformAuditView(generics.ListCreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         try:
+            user_latitude = request.data.get('latitude')
+            user_longitude = request.data.get('longitude')
             checkpoint = equipment_query.CheckPointQuery().get_object(request.data.get('checkpoint'))
             if checkpoint is None:
                 return Response({"status":404,"message":"Checkpoint not found"},status=404)
             # TODO: Verify location proximity
-            is_valid_location = equipment_service.EquipmentService.verify_equipment_location(
-            checkpoint.equipment.id, 
-            round(float(request.data.get('latitude')), 2), 
-            round(float(request.data.get('longitude')), 2)
-            )
+            latitude,longitude = shared_utils.CoordinateRangeCalculator.extract_coordinates(checkpoint.equipment.location_coordinates)
+            is_valid_location = shared_utils.CoordinateRangeCalculator(latitude,longitude,checkpoint.equipment.location_radius).is_within_range(user_latitude,user_longitude)
             if not is_valid_location:
                 return Response({"status":400,"data":"You must be within proximity of the equipment"},status=400)
 

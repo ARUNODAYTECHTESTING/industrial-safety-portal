@@ -43,30 +43,65 @@ class HostManager:
         return domain
    
     
+# class QRCodeManager:
+#     @staticmethod
+#     def generate_qr_code(id):
+#         try:
+#             equipment = equipment_models.Equipment.objects.get(id=id)  # Use `.get()` directly
+            
+#             if not equipment.qr:  # Check if QR exists
+#                 # TODO: qr_Data should be http://base_url:port/equipment/{id}
+#                 protocol ='http://' if settings.DEBUG else 'http://'
+#                 url = f"{protocol}{HostManager.get_base_url()}/equipment/{id}"
+#                 qr_data = str(url)  # Ensure it's a string
+                
+#                 qr = qrcode.make(qr_data)
+                
+#                 # Save to in-memory buffer
+#                 buffer = BytesIO()
+#                 qr.save(buffer, format="PNG")
+#                 file = ContentFile(buffer.getvalue())  # Only content, no filename
+                
+#                 # Save the generated QR code to the model
+#                 equipment.qr.save(f"QR_{id}.png", file, save=True)
+        
+#         except equipment_models.Equipment.DoesNotExist:
+#             print(f"Error: Equipment with ID {id} not found.")
+        
+#         except Exception as e:
+#             print(f"Error: {e}")
+
+
 class QRCodeManager:
     @staticmethod
     def generate_qr_code(id):
         try:
-            equipment = equipment_models.Equipment.objects.get(id=id)  # Use `.get()` directly
+            equipment = equipment_models.Equipment.objects.get(id=id)
+
+            # Determine the expected QR data URL
+            protocol = "http://" if settings.DEBUG else "https://"
+            url = f"{protocol}{HostManager.get_base_url()}/equipment/{id}"
+            qr_data = str(url)  # Ensure it's a string
             
-            if not equipment.qr:  # Check if QR exists
-                # TODO: qr_Data should be http://base_url:port/equipment/{id}
-                protocol ='http://' if settings.DEBUG else 'http://'
-                url = f"{protocol}{HostManager.get_base_url()}/equipment/{id}"
-                qr_data = str(url)  # Ensure it's a string
-                
-                qr = qrcode.make(qr_data)
-                
-                # Save to in-memory buffer
-                buffer = BytesIO()
-                qr.save(buffer, format="PNG")
-                file = ContentFile(buffer.getvalue())  # Only content, no filename
-                
-                # Save the generated QR code to the model
-                equipment.qr.save(f"QR_{id}.png", file, save=True)
-        
+            # Check if QR already exists and is up-to-date
+            if equipment.qr:
+                print(f"QR Code for Equipment {id} is already generated.")
+                return  
+
+            # Generate QR Code
+            qr = qrcode.make(qr_data)
+
+            # Save to in-memory buffer
+            buffer = BytesIO()
+            qr.save(buffer, format="PNG")
+            file = ContentFile(buffer.getvalue())  # Content-only file
+            
+            # Save the generated QR code to the model
+            equipment.qr.save(f"QR_{id}.png", file, save=True)
+            print(f"QR Code for Equipment {id} generated successfully.")
+
         except equipment_models.Equipment.DoesNotExist:
             print(f"Error: Equipment with ID {id} not found.")
-        
+
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error generating QR Code: {e}")

@@ -11,11 +11,14 @@ from django.contrib.contenttypes.models import ContentType
 from account import managers
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib.sites.models import Site
+
 class Command(BaseCommand):
     help = "Load dummy data into the database"
 
     def handle(self, *args, **kwargs):
         try:
+            self.register_domain_name()
             self.setup_permissions()
             self.create_dummy_departments()
             self.create_dummy_plant()
@@ -254,3 +257,16 @@ class Command(BaseCommand):
                 fullfillment_date = timezone.now() + timedelta(days=5)
             )
         print("Schedules created successfully!")
+    
+    def register_domain_name(self):
+        try:
+            Site.objects.update_or_create(
+            id=1,
+            defaults={
+                "domain": "safety-frontend.developer-ayush.com",
+                "name": "Safety Management System"
+            }
+            )
+            print("Registered domain name successfully")
+        except Exception as e:
+            print(f"Error registering domain name: {e}")

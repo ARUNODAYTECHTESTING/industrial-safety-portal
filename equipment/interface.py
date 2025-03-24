@@ -43,3 +43,9 @@ class IAudit(abc.ABC):
     @abc.abstractmethod
     def get_audits_by_equipment_id(self, id) -> object:
         pass
+
+
+class IObservation(abc.ABC):
+    @abc.abstractmethod
+    def get_observations_by_audit_id(self, audit_id) -> List:
+        pass

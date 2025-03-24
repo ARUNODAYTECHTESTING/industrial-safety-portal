@@ -1424,14 +1424,18 @@ class PerformAuditDetailsView(generics.RetrieveUpdateDestroyAPIView):
         audit = self.get_object()
         assigned_by = getattr(audit.schedule, "assigned_by", None)
         approve_status = serializer.validated_data.get("approve_status",None)
-
-        if self.request.user == assigned_by:
+        # TODO: if audit perform based on schedule or if audit perform without schedule it can be closed by auditor owner or assigner of the schedule
+        if self.request.user == assigned_by or self.request.user == audit.auditor.manage_by:
             if approve_status is not None and approve_status == "APPROVED":
-                print("--------------------1")
-                serializer.save(request_status="CLOSED")
+                observation = equipment_query.ObservationQuery().get_observations_by_audit_id(audit.id)
+                if observation:
+                   if observation.approve_status == "PENDING":
+                       raise PermissionDenied("Cannot close the audit if observation is open")
+                    
+                else:
+                    serializer.save(request_status="CLOSED")
 
             elif approve_status is not None and approve_status == "REJECTED":
-                print("--------------------2")
 
                 serializer.save(request_status="OPEN")
 

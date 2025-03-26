@@ -160,7 +160,7 @@ class Checkpoint(shared_models.TimeStamp):
 
 
 # TODO: latest changes
-class Audit(models.Model):
+class Audit(shared_models.TimeStamp):
     REQUEST_STATUS_CHOICES = [
         ('OPEN', 'OPEN'),
         ('IN PROGRESS', 'IN PROGRESS'),

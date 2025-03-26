@@ -174,7 +174,7 @@ class Audit(shared_models.TimeStamp):
     remark = models.CharField(max_length=64,null=True, blank=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL,null=True,blank=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.SET_NULL,null=True,blank=True)
-    auditor = models.ForeignKey('account.User', on_delete=models.CASCADE)
+    auditor = models.ForeignKey('account.User', on_delete=models.CASCADE,related_name="audits")
     audit_date = models.DateTimeField(default=timezone.now)
     request_status = models.CharField(max_length=64, choices=REQUEST_STATUS_CHOICES, default='OPEN')
     approve_status = models.CharField(max_length=64,choices=APPROVED_STATUS_COICES,default='PENDING')   

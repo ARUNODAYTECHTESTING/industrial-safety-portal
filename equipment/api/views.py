@@ -1256,7 +1256,7 @@ class NotificationSummary(generics.ListAPIView):
 class AuditorAuditSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    queryset = account_models.User.objects.filter(observations__isnull=False).distinct()
+    queryset = account_models.User.objects.filter(audits__isnull=False).distinct()
     
     @swagger_auto_schema(
         tags=['Audit'],
@@ -1267,21 +1267,21 @@ class AuditorAuditSummary(generics.ListAPIView):
         # Comprehensive Auditor Performance Tracking
         auditor_performance = self.queryset.annotate(
             # Audit Counts
-            total_audits=Count('observations', distinct=True),
-            completed_audits=Count('observations', filter=Q(observations__request_status='closed'), distinct=True),
-            pending_audits=Count('observations', filter=Q(observations__request_status='open'), distinct=True),
-            ongoing_audits=Count('observations', filter=Q(observations__request_status='in-progress'), distinct=True),
+            total_audits=Count('audits', distinct=True),
+            completed_audits=Count('audits', filter=Q(observations__request_status='CLOSED'), distinct=True),
+            pending_audits=Count('audits', filter=Q(observations__request_status='OPEN'), distinct=True),
+            ongoing_audits=Count('audits', filter=Q(observations__request_status='IN PROGRESS'), distinct=True),
             # failed_audits=Count('observations', filter=Q(observations__request_status='failed'), distinct=True),
             
             # Approval Status Counts
-            approved_audits=Count('observations', filter=Q(observations__approve_status='approved'), distinct=True),
-            rejected_audits=Count('observations', filter=Q(observations__approve_status='rejected'), distinct=True),
+            approved_audits=Count('audits', filter=Q(observations__approve_status='APPROVED'), distinct=True),
+            rejected_audits=Count('audits', filter=Q(observations__approve_status='REJECTED'), distinct=True),
             
             # Audit Performance Metrics
             compliance_score=ExpressionWrapper(
                 Coalesce(
-                    Count('observations', filter=Q(observations__approve_status='approved'), distinct=True) * 100.0 / 
-                    Coalesce(Count('observations', distinct=True), 1),
+                    Count('audits', filter=Q(observations__approve_status='APPROVED'), distinct=True) * 100.0 / 
+                    Coalesce(Count('audits', distinct=True), 1),
                     0
                 ),
                 output_field=DecimalField(max_digits=5, decimal_places=2)

@@ -1175,8 +1175,8 @@ class AuditSummary(generics.ListAPIView):
 
 class NotificationSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = equipment_models.Observation.objects.all()
-    serializer_class = equipment_serializers.ObservationSerializer
+    queryset = equipment_models.Audit.objects.all()
+    serializer_class = equipment_serializers.AuditSummarySerializer
 
     def get_filtered_queryset(self, user, base_queryset):
         """Helper method to get filtered queryset based on user role"""
@@ -1189,14 +1189,14 @@ class NotificationSummary(generics.ListAPIView):
             "checkpoint__equipment__name",
             "updated_at",
             "request_status",
-            "owner__name",
+            "auditor__name",
             "remark",
-            "owner__schedule__assigned_by__name",
+            "auditor__schedule__assigned_by__name",
         ]
 
         try:
             # Filter out completed requests
-            filtered_queryset = base_queryset.exclude(request_status="closed")
+            filtered_queryset = base_queryset.exclude(request_status="CLOSED")
             
             # Get user groups
             user_groups = set(user.groups.values_list('name', flat=True))
@@ -1206,17 +1206,17 @@ class NotificationSummary(generics.ListAPIView):
                 if user.last_login is None:
                     logger.warning(f"User {user.id} has no last_login timestamp")
                     return filtered_queryset.filter(
-                        owner=user
+                        auditor=user
                     ).values(*common_values)
                     
                 return filtered_queryset.filter(
-                    owner=user,
+                    auditor=user,
                     updated_at__gt=user.last_login
                 ).values(*common_values)
 
             # For non-auditors
             schedule_query = equipment_query.ScheduleQuery()
-            assigned_users = schedule_query.get_schedule_assigned_by(user)
+            assigned_users = schedule_query.get_schedule_by_assigner_or_auditor(user)
             
             if assigned_users is None:
                 logger.warning(f"No assigned users found for user {user.id}")
@@ -1229,7 +1229,7 @@ class NotificationSummary(generics.ListAPIView):
                 return []
                 
             return filtered_queryset.filter(
-                owner__in=list(user_ids)
+                auditor__in=list(user_ids)
             ).values(*common_values)
 
         except Exception as e:

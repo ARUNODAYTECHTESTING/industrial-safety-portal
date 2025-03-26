@@ -314,7 +314,35 @@ class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
         operation_description="Update an existing equipment by its ID."
     )
     def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
+        try:
+            payload = request.data
+            response = super().partial_update(request, *args, **kwargs)
+
+            # Fetch updated equipment instance
+            equipment = equipment_models.Equipment.objects.get(id=response.data['id'])
+
+            # Fetch audit parameters from request
+            audit_parameters = equipment_models.MasterAuditParameter.objects.filter(id__in=payload.get('audit_parameter', []))
+
+            if audit_parameters:
+                for audit_parameter in audit_parameters:
+                    checkpoint_found = equipment_models.Checkpoint.objects.filter(
+                        equipment=equipment,
+                        audit_parameter=audit_parameter
+                    ).first()
+                    if checkpoint_found:
+                        checkpoint_found.delete()
+                    else:
+                        equipment_models.Checkpoint.objects.update_or_create(
+                            equipment=equipment,
+                            audit_parameter=audit_parameter
+                        )
+
+            return Response({"message": "Equipment updated successfully"}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
     @swagger_auto_schema(
         tags=['Equipment'],
@@ -324,9 +352,7 @@ class EquipmentDetailsView(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
-    @swagger_auto_schema(auto_schema=None)
-    def put(self, request, *args, **kwargs):
-        pass
+ 
 
 class ScheduleTypeView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]

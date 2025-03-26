@@ -162,14 +162,14 @@ class Checkpoint(shared_models.TimeStamp):
 # TODO: latest changes
 class Audit(models.Model):
     REQUEST_STATUS_CHOICES = [
-        ('OPEN', 'Open'),
-        ('IN PROGRESS', 'In Progress'),
-        ('CLOSED', 'Closed')
+        ('OPEN', 'OPEN'),
+        ('IN PROGRESS', 'IN PROGRESS'),
+        ('CLOSED', 'CLOSED')
     ]
     APPROVED_STATUS_COICES = (
-        ('PENDING', 'Pending'),
-        ('APPROVED', 'Approved'),
-        ('REJECTED', 'Rejected'),
+        ('PENDING', 'PENDING'),
+        ('APPROVED', 'APPROVED'),
+        ('REJECTED', 'REJECTED'),
     )
     remark = models.CharField(max_length=64,null=True, blank=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL,null=True,blank=True)
@@ -189,14 +189,14 @@ class Audit(models.Model):
 class Observation(shared_models.TimeStamp):
     # Open resolved closed
     REQUEST_STATUS_CHOICES = [
-        ('OPEN', 'Open'),
-        ('IN PROGRESS', 'In Progress'),
-        ('CLOSED', 'Closed')
+        ('OPEN', 'OPEN'),
+        ('IN PROGRESS', 'IN PROGRESS'),
+        ('CLOSED', 'CLOSED')
     ]
     APPROVED_STATUS_COICES = (
-        ('PENDING', 'Pending'),
-        ('APPROVED', 'Approved'),
-        ('REJECTED', 'Rejected'),
+        ('PENDING', 'PENDING'),
+        ('APPROVED', 'APPROVED'),
+        ('REJECTED', 'REJECTED'),
     )
     name = models.CharField(max_length=64,null=True, blank=True)
     checkpoint = models.ForeignKey(Checkpoint,on_delete=models.SET_NULL,null=True, blank=True)

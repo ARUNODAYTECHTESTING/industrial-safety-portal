@@ -605,6 +605,11 @@ class ObservationApiView(generics.ListCreateAPIView):
 
     serializer_class = equipment_serializers.ObservationSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["current_user"] = self.request.user  
+        return context
+
     @swagger_auto_schema(
         tags=['Observation'],
         operation_summary="List and create observation",
@@ -1470,4 +1475,33 @@ class PerformAuditDetailsView(generics.RetrieveUpdateDestroyAPIView):
 
         else:
             raise PermissionDenied("You do not have permission to perform this action")
-    
+
+class EquipmentsAuditView(generics.ListAPIView):
+    serializer_class = equipment_serializers.PerformAuditDetailSerializer
+    queryset = equipment_models.Audit.objects.all()
+    def get_queryset(self):
+        pk = self.kwargs.get("pk") 
+        return equipment_models.Audit.objects.filter(equipment_id=pk)
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Get audit by equipment ID",
+        operation_description="Get an audit by equipment ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+class AuditsObservationView(generics.ListAPIView):
+    serializer_class = equipment_serializers.ObservationSerializer
+    queryset = equipment_models.Observation.objects.all()
+
+    def get_queryset(self):
+        pk = self.kwargs.get("pk") 
+        return equipment_models.Observation.objects.filter(audit_id=pk)
+
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Get audit by equipment ID",
+        operation_description="Get an audit by equipment ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)

@@ -25,9 +25,11 @@ def create_observation(sender, instance, **kwargs):
                 audit = instance,
                 schedule=instance.schedule,
                 checkpoint=instance.checkpoint,
-                owner=instance.auditor
+                owner=instance.auditor,
+                department=instance.auditor.department,
+                plant = instance.plant
             )
-
+        
 @receiver(post_save, sender=equipment_models.Audit)
 def update_equipment_status(sender, instance, **kwargs):
     print(f"update_equipment_status trigger.................")

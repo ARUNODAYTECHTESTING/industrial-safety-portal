@@ -31,7 +31,7 @@ urlpatterns = [
     # TODO: Audit
     path("perform-audit/",equipment_views.PerformAuditView.as_view(),name = 'perform-audit'),
     path("perform-audit-details/<int:pk>/",equipment_views.PerformAuditDetailsView.as_view(),name = 'perform-audit-details'),
-
-
+    path("<int:pk>/audit",equipment_views.EquipmentsAuditView.as_view(),name = 'equipment-audits'),
+    path("audit/<int:pk>/observation",equipment_views.AuditsObservationView.as_view(),name = 'audits-observation'),
 
 ]

@@ -124,7 +124,9 @@ class ObservationSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        
+        current_user = self.context.get("current_user",None)
+        if current_user is not None:
+            representation['is_maintainer'] = True if current_user == instance.owner.manage_by else False
         # Serialize the checkpoint and keep only 'id' and 'name'
         checkpoint_data = CheckPointSerializer(instance.checkpoint).data
         representation['checkpoint'] =  checkpoint_data.get("audit_parameter"),
@@ -140,7 +142,15 @@ class ObservationSerializer(serializers.ModelSerializer):
                                 "equipment_type":instance.checkpoint.equipment.equipment_type.name
                                 }
         representation['schedule'] = {"id":instance.schedule.id,"fullfillment_date":instance.schedule.fullfillment_date,"status":instance.schedule.status} if instance.schedule else None
+        if instance.action_owner:
+            action_owner = account_api_serializers.UserSerializer(instance.action_owner).data
+            representation['action_owner'] = {"id": action_owner.get("id"),"name": action_owner.get("name")}
+        if instance.action_auditor:
+            action_auditor = account_api_serializers.UserSerializer(instance.action_auditor).data
+            representation['action_auditor'] = {"id": action_auditor.get("id"),"name": action_auditor.get("name")}
 
+        audit = PerformAuditSerializer(instance.audit).data
+        representation['audit'] = {"id":audit.get('id'),"remark":audit.get("remark"),"is_ok":audit.get("is_ok")}
         return representation
 
 

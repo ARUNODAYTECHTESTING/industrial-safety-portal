@@ -618,7 +618,9 @@ class ObservationApiView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         if account_permissions.RoleManager(request.user).is_auditor():
             self.queryset = self.queryset.filter(Q(owner=request.user) | Q(action_auditor=request.user))
-        
+        else:
+            self.queryset = self.queryset.filter(Q(owner__manage_by=request.user) | Q(owner=request.user) | Q(schedule__assigned_by=request.user)| Q(action_owner=request.user))
+
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -1180,10 +1182,93 @@ class AuditSummary(generics.ListAPIView):
             'monthly_summary': self.get_monthly_data(queryset)
         })
 
+# class NotificationSummary(generics.ListAPIView):
+#     permission_classes = [permissions.IsAuthenticated]
+#     queryset = equipment_models.Audit.objects.all()
+#     serializer_class = equipment_serializers.AuditSummarySerializer
+
+#     def get_filtered_queryset(self, user, base_queryset):
+#         """Helper method to get filtered queryset based on user role"""
+#         if not user or not base_queryset:
+#             logger.warning("User or base_queryset is None")
+#             return []
+
+#         common_values = [
+#             "id",
+#             "checkpoint__equipment__name",
+#             "updated_at",
+#             "request_status",
+#             "auditor__name",
+#             "remark",
+#             "auditor__schedule__assigned_by__name",
+#         ]
+
+#         try:
+#             # Filter out completed requests
+#             filtered_queryset = base_queryset.exclude(request_status="CLOSED")
+            
+#             # Get user groups
+#             user_groups = set(user.groups.values_list('name', flat=True))
+            
+#             # Check if user is an auditor
+#             if "Auditor" in user_groups or "Auditors" in user_groups:
+#                 if user.last_login is None:
+#                     logger.warning(f"User {user.id} has no last_login timestamp")
+#                     return filtered_queryset.filter(
+#                         auditor=user
+#                     ).values(*common_values)
+                    
+#                 return filtered_queryset.filter(
+#                     auditor=user,
+#                     updated_at__gt=user.last_login
+#                 ).values(*common_values)
+
+#             # For non-auditors
+#             schedule_query = equipment_query.ScheduleQuery()
+#             assigned_users = schedule_query.get_schedule_by_assigner_or_auditor(user)
+            
+#             if assigned_users is None:
+#                 logger.warning(f"No assigned users found for user {user.id}")
+#                 return []
+                
+#             user_ids = assigned_users.values_list("user_id", flat=True)
+            
+#             if not user_ids:
+#                 logger.warning(f"Empty user_ids list for user {user.id}")
+#                 return []
+                
+#             return filtered_queryset.filter(
+#                 auditor__in=list(user_ids)
+#             ).values(*common_values)
+
+#         except Exception as e:
+#             logger.error(f"Error in get_filtered_queryset: {str(e)}")
+#             return []
+
+#     @swagger_auto_schema(
+#         tags=['Audit'],
+#         operation_summary="Comprehensive Audit Overview",
+#         operation_description="Retrieve detailed audit statistics including total audits, compliance score, and status breakdown"
+#     )
+#     def get(self, request, *args, **kwargs):
+#         try:
+#             queryset = self.get_filtered_queryset(request.user, self.get_queryset())
+#             return Response({
+#                 "status": 200,
+#                 "data": list(queryset)  # Explicitly convert to list
+#             },status=200)
+#         except Exception as e:
+#             logger.error(f"Error in get method: {str(e)}")
+#             return Response({
+#                 "status": 500,
+#                 "error": "An error occurred while processing your request",
+#                 "detail": str(e)
+#             }, status=500)
+
 class NotificationSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = equipment_models.Audit.objects.all()
-    serializer_class = equipment_serializers.AuditSummarySerializer
+    queryset = equipment_models.Observation.objects.all()
+    serializer_class = equipment_serializers.ObservationSerializer
 
     def get_filtered_queryset(self, user, base_queryset):
         """Helper method to get filtered queryset based on user role"""
@@ -1196,9 +1281,9 @@ class NotificationSummary(generics.ListAPIView):
             "checkpoint__equipment__name",
             "updated_at",
             "request_status",
-            "auditor__name",
+            "owner__name",
             "remark",
-            "auditor__schedule__assigned_by__name",
+            "owner__schedule__assigned_by__name",
         ]
 
         try:
@@ -1213,31 +1298,19 @@ class NotificationSummary(generics.ListAPIView):
                 if user.last_login is None:
                     logger.warning(f"User {user.id} has no last_login timestamp")
                     return filtered_queryset.filter(
-                        auditor=user
-                    ).values(*common_values)
+                        owner=user
+                    ).values(*common_values).distinct()
                     
                 return filtered_queryset.filter(
-                    auditor=user,
+                    owner=user,
                     updated_at__gt=user.last_login
-                ).values(*common_values)
+                ).values(*common_values).distinct()
 
-            # For non-auditors
-            schedule_query = equipment_query.ScheduleQuery()
-            assigned_users = schedule_query.get_schedule_by_assigner_or_auditor(user)
-            
-            if assigned_users is None:
-                logger.warning(f"No assigned users found for user {user.id}")
-                return []
-                
-            user_ids = assigned_users.values_list("user_id", flat=True)
-            
-            if not user_ids:
-                logger.warning(f"Empty user_ids list for user {user.id}")
-                return []
+           
                 
             return filtered_queryset.filter(
-                auditor__in=list(user_ids)
-            ).values(*common_values)
+                owner__manage_by=user
+            ).values(*common_values).distinct()
 
         except Exception as e:
             logger.error(f"Error in get_filtered_queryset: {str(e)}")

@@ -127,6 +127,12 @@ class ObservationSerializer(serializers.ModelSerializer):
         current_user = self.context.get("current_user",None)
         if current_user is not None:
             representation['is_maintainer'] = True if current_user == instance.owner.manage_by else False
+        
+        if instance.action_auditor:
+            representation['is_action_audior'] = True if current_user == instance.action_auditor else False
+        else:
+            representation['is_action_audior'] = False
+
         # Serialize the checkpoint and keep only 'id' and 'name'
         checkpoint_data = CheckPointSerializer(instance.checkpoint).data
         representation['checkpoint'] =  checkpoint_data.get("audit_parameter"),

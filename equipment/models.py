@@ -129,7 +129,8 @@ class Schedule(shared_models.TimeStamp):
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
 
-
+    def __str__(self):
+        return f"{self.user.name} is assigned by  {self.assigned_by.name}"
 class MasterAuditParameter(shared_models.TimeStamp):
     name = models.CharField(max_length=64)
 

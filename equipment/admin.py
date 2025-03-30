@@ -18,7 +18,7 @@ admin.site.register(equipment_models.Audit)
 class ObservationAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'checkpoint', 'category', 'request_status', 'approve_status',
-        'owner', 'department', 'plant', 'target_date', 'actual_complete_date',
+        'owner','action_owner','action_auditor','department', 'plant', 'target_date', 'actual_complete_date',
         'created_at', 'updated_at'
     )
     list_filter = ('request_status', 'approve_status', 'department', 'plant')

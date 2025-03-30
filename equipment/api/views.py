@@ -650,6 +650,7 @@ class ObservationDetailsApiView(generics.RetrieveUpdateDestroyAPIView):
         operation_description="Update an existing observation by its ID."
     )
     def perform_update(self, serializer):
+        observation = self.get_queryset()
         action_owner = serializer.validated_data.get("action_owner",None)
         action_auditor = serializer.validated_data.get("action_auditor",None)
 
@@ -658,8 +659,9 @@ class ObservationDetailsApiView(generics.RetrieveUpdateDestroyAPIView):
             if account_permissions.RoleManager(action_owner).is_auditor():
                 raise PermissionDenied("Action owner must not be an auditor")
 
-            elif action_owner.department.name == self.request.user.department.name:
-                raise PermissionDenied("Action owner must be from different department")
+            # elif observation.action_owner != self.request.user:
+            #     if action_owner.department.name == self.request.user.department.name:
+            #         raise PermissionDenied("Action owner must be from different department")
             
         elif action_auditor is not None:
             user_type = account_query.GroupQuery().get_user_type_level(self.request.user)
@@ -1505,3 +1507,64 @@ class AuditsObservationView(generics.ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+
+class PerformBulkAuditView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = equipment_serializers.PerformBulkAuditSerializer
+    queryset = equipment_models.Audit.objects.all()
+
+    @swagger_auto_schema(
+        tags=['Audit'],
+        operation_summary="Create multiple audits",
+        operation_description="Create multiple audit records for different checkpoints.",
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            audit_data_list = request.data.get('audits')  # Expecting an array of objects
+
+            if not isinstance(audit_data_list, list):
+                return Response({"status": 400, "message": "Invalid data format. Expected a list of objects."}, status=400)
+
+            audits_to_create = []
+            observation_to_create = []
+            for audit_data in audit_data_list:
+                user_latitude = audit_data.get('latitude')
+                user_longitude = audit_data.get('longitude')
+                checkpoint = equipment_query.CheckPointQuery().get_object(audit_data.get('checkpoint'))
+
+                if checkpoint is None:
+                    return Response({"status": 404, "message": f"Checkpoint {audit_data.get('checkpoint')} not found"}, status=404)
+
+                # Verify location proximity
+                latitude, longitude = shared_utils.CoordinateRangeCalculator.extract_coordinates(checkpoint.equipment.location_coordinates)
+                is_valid_location = shared_utils.CoordinateRangeCalculator(latitude, longitude, checkpoint.equipment.location_radius).is_within_range(user_latitude, user_longitude)
+
+                if not is_valid_location:
+                    return Response({"status": 400, "message": f"You must be within proximity of checkpoint {audit_data.get('checkpoint')}"}, status=400)
+
+                # Find corresponding schedule
+                schedule = equipment_query.ScheduleQuery().get_schedule_by_equipment(
+                    equipment_id=checkpoint.equipment.id, user_id=request.user.id
+                )
+
+                # Create audit record
+                audits_to_create.append(equipment_models.Audit(
+                    checkpoint=checkpoint,
+                    equipment=checkpoint.equipment,
+                    schedule=schedule,
+                    auditor=request.user,
+                    is_ok=audit_data.get('is_ok'),
+                    remark=audit_data.get('remark', None)
+                ))
+               
+            # Bulk create all audits at once
+            created_audits = equipment_models.Audit.objects.bulk_create(audits_to_create)
+            created_audit_ids = [audit.id for audit in created_audits]
+            equipment_query.ObservationQuery().bulk_create_observation(created_audit_ids)
+            # TODO: update status of audit and schedule
+            equipment_query.ScheduleQuery().update_schedule_status(created_audits)
+            return Response({"status": 200, "message": "Audits created successfully"}, status=200)
+
+        except Exception as e:
+            return Response({"status": 400, "message": str(e)}, status=400)

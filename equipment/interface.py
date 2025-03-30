@@ -24,6 +24,10 @@ class ISchedule(abc.ABC):
     @abc.abstractmethod
     def get_schedule_by_assigner_or_auditor(self, assigner_or_auditor):
         pass
+        
+    @abc.abstractmethod
+    def update_schedule_status(self,audits) -> None:
+        pass
 
 class IEquipment(abc.ABC):
     @abc.abstractmethod
@@ -48,4 +52,8 @@ class IAudit(abc.ABC):
 class IObservation(abc.ABC):
     @abc.abstractmethod
     def get_observations_by_audit_id(self, audit_id) -> List:
+        pass
+    
+    @abc.abstractmethod
+    def bulk_create_observation(self,audit_ids) -> None:
         pass

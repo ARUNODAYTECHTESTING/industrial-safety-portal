@@ -27,7 +27,7 @@ def create_observation(sender, instance, **kwargs):
                 checkpoint=instance.checkpoint,
                 owner=instance.auditor,
                 department=instance.auditor.department,
-                plant = instance.plant
+                plant = instance.auditor.plant
             )
         
 @receiver(post_save, sender=equipment_models.Audit)

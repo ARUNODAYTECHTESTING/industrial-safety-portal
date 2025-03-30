@@ -240,3 +240,13 @@ class PerformAuditDetailSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['checkpoint'] = CheckPointSerializer(instance.checkpoint).data
         return representation
+
+class PerformBulkAuditSerializer(serializers.Serializer):
+    audits = PerformAuditSerializer(many=True)  # Expecting an array of audit objects
+
+    def validate_audits(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Expected a list of audit objects.")
+        if not value:
+            raise serializers.ValidationError("Audit list cannot be empty.")
+        return value

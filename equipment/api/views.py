@@ -608,6 +608,7 @@ class ObservationApiView(generics.ListCreateAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["current_user"] = self.request.user  
+        context["request"] = self.request
         return context
 
     @swagger_auto_schema(

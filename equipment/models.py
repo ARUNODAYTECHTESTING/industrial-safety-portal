@@ -184,9 +184,9 @@ class Audit(shared_models.TimeStamp):
     checkpoint = models.ForeignKey(Checkpoint,on_delete=models.CASCADE,related_name="audits")
     is_ok = models.BooleanField(default=True)
     def __str__(self):
-        return f"{self.equipment.name} - Attempt {self.audit_attempt} - {self.audit_date.strftime('%Y-%m-%d')}"
+        return f"{self.id} - {self.equipment.name} - Attempt {self.audit_attempt} - {self.audit_date.strftime('%Y-%m-%d')}"
 
-    
+
 
 class Observation(shared_models.TimeStamp):
     # Open resolved closed

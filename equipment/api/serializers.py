@@ -125,6 +125,8 @@ class ObservationSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         current_user = self.context.get("current_user",None)
+        request = self.context.get("request",None)
+
         if current_user is not None:
             representation['is_maintainer'] = True if current_user == instance.owner.manage_by else False
         
@@ -156,7 +158,10 @@ class ObservationSerializer(serializers.ModelSerializer):
             representation['action_auditor'] = {"id": action_auditor.get("id"),"name": action_auditor.get("name")}
 
         audit = PerformAuditSerializer(instance.audit).data
-        representation['audit'] = {"id":audit.get('id'),"remark":audit.get("remark"),"is_ok":audit.get("is_ok")}
+        audit_image = audit.get("audit_image")
+        if audit_image and request:
+            audit_image = request.build_absolute_uri(audit_image)
+        representation['audit'] = {"id":audit.get('id'),"remark":audit.get("remark"),"is_ok":audit.get("is_ok"),"audit_image":audit_image}
         return representation
 
 
@@ -228,7 +233,7 @@ class PerformAuditSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = equipment_models.Audit
-        fields = ["id","is_ok","remark","checkpoint","latitude","longitude","request_status","approve_status"]
+        fields = ["id","is_ok","remark","checkpoint","latitude","longitude","request_status","approve_status","audit_image"]
         extra_kwargs = {"remark": {"read_only": True},"request_status": {"read_only": True},"approve_status": {"read_only": True}}  
 
     def to_representation(self, instance):

@@ -249,7 +249,6 @@ class PerformAuditDetailSerializer(serializers.ModelSerializer):
 
 class PerformBulkAuditSerializer(serializers.Serializer):
     audits = PerformAuditSerializer(many=True)  # Expecting an array of audit objects
-
     def validate_audits(self, value):
         if not isinstance(value, list):
             raise serializers.ValidationError("Expected a list of audit objects.")

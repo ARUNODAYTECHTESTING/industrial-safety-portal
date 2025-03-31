@@ -1620,6 +1620,13 @@ class PerformBulkAuditView(generics.CreateAPIView):
                 schedule = equipment_query.ScheduleQuery().get_schedule_by_equipment(
                     equipment_id=checkpoint.equipment.id, user_id=request.user.id
                 )
+                audit_image = audit_data.get('audit_image')
+                image_file = None
+                if audit_image:
+                    image_file = equipment_service.decode_base64_image(audit_image, filename_prefix=f"audit_{checkpoint.id}")
+                    if image_file is None:
+                        # Log that image decoding failed
+                        logger.warning(f"Failed to decode image for checkpoint {checkpoint.id}")
 
                 # Create audit record
                 audits_to_create.append(equipment_models.Audit(
@@ -1628,7 +1635,9 @@ class PerformBulkAuditView(generics.CreateAPIView):
                     schedule=schedule,
                     auditor=request.user,
                     is_ok=audit_data.get('is_ok'),
-                    remark=audit_data.get('remark', None)
+                    remark=audit_data.get('remark', None),
+                    audit_image=image_file  # Save decoded image
+
                 ))
                
             # Bulk create all audits at once

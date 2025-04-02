@@ -1140,7 +1140,8 @@ class AuditSummary(generics.ListAPIView):
         pass_fail_breakdown = {
             'passed': queryset.filter(approve_status='APPROVED').count(),
             'rejected': queryset.filter(approve_status='REJECTED').count(),
-            'pending_review': queryset.filter(approve_status='PENDING').count()
+            'pending_review': queryset.filter(approve_status='PENDING').count(),
+            'delayed_tasks':equipment_query.ScheduleQuery().get_old_schedule()
         }
         return pass_fail_breakdown
     
@@ -1175,7 +1176,7 @@ class AuditSummary(generics.ListAPIView):
                 'total_audits': self.get_total_audits(queryset),
                 'pending_audits': self.get_pending_audits(queryset),
                 'compliance_score': round(self.calculate_compliance_score(queryset), 2),
-                'pass_fail_ratio': self.get_pass_fail_breakdown(queryset)
+                'pass_fail_ratio': self.get_pass_fail_breakdown(queryset),
             },
             'status_breakdown': self.get_status_breakdown(queryset),
             'weekly_summary': self.get_weekly_data(queryset),
@@ -1513,7 +1514,7 @@ class PerformAuditView(generics.ListCreateAPIView):
             
             auditor_ids = list(schedule_queryset.values_list('user_id', flat=True).distinct())
             
-            self.queryset = self.queryset.filter(auditor_id__in=auditor_ids)
+            self.queryset = self.queryset.filter(Q(auditor_id__in=auditor_ids) | Q(auditor__manage_by = request.user) |  Q(auditor = request.user))
 
             return super().get(request, *args, **kwargs)
 
@@ -1637,7 +1638,8 @@ class PerformBulkAuditView(generics.CreateAPIView):
                     auditor=request.user,
                     is_ok=audit_data.get('is_ok'),
                     remark=audit_data.get('remark', None),
-                    audit_image=image_file  # Save decoded image
+                    audit_image=image_file,  # Save decoded image
+                    request_status = "IN PROGRESS"
 
                 ))
                

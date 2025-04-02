@@ -2,6 +2,8 @@
 from equipment import interface as equipment_interface
 from equipment import models as equipment_models
 from django.db.models import Q
+from django.utils import timezone
+
 
 class PlantQuery(equipment_interface.IPlant):
     def get_all_plants(self):
@@ -28,6 +30,9 @@ class ScheduleQuery(equipment_interface.ISchedule):
         for audit in audits:
             if audit.schedule:
                 equipment_models.Schedule.objects.filter(id = audit.schedule.id).update(status="COMPLETED")
+
+    def get_old_schedule(self):
+        return equipment_models.Schedule.objects.filter(schedule_date__date__lt = timezone.now().date()).count()
 
 class EquipmentQuery(equipment_interface.IEquipment):
     def get_equipment_by_id(self, id):
@@ -60,5 +65,7 @@ class ObservationQuery(equipment_interface.IObservation):
                     checkpoint=instance.checkpoint,
                     owner=instance.auditor,
                     department=instance.auditor.department,
-                    plant = instance.auditor.plant
+                    plant = instance.auditor.plant,
+                    audit_image = instance.audit_image,
+                    remark = instance.remark
                 )

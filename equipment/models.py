@@ -173,6 +173,8 @@ class Audit(shared_models.TimeStamp):
         ('REJECTED', 'REJECTED'),
     )
     audit_image = models.ImageField(upload_to = 'audit/',null=True,blank=True)
+    correction_image = models.ImageField(upload_to = 'audit/',null=True,blank=True)
+
     remark = models.CharField(max_length=64,null=True, blank=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL,null=True,blank=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.SET_NULL,null=True,blank=True)
@@ -203,7 +205,9 @@ class Observation(shared_models.TimeStamp):
     name = models.CharField(max_length=64,null=True, blank=True)
     checkpoint = models.ForeignKey(Checkpoint,on_delete=models.SET_NULL,null=True, blank=True)
     image = models.ImageField(upload_to = 'observation/',null=True,blank=True)
+    audit_image = models.ImageField(upload_to = 'observation/',null=True,blank=True)
     correction_image = models.ImageField(upload_to = 'observation/',null=True,blank=True)
+    remark = models.CharField(max_length=64,null=True, blank=True)
     attempt = models.PositiveBigIntegerField(default=1)
     category = models.CharField(max_length=64,null=True,blank=True)
     corrective_remark = models.CharField(max_length=64,null=True,blank=True)

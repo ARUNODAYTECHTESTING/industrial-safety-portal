@@ -28,6 +28,10 @@ class ISchedule(abc.ABC):
     @abc.abstractmethod
     def update_schedule_status(self,audits) -> None:
         pass
+    
+    @abc.abstractmethod
+    def get_old_schedule(self) -> None:
+        pass
 
 class IEquipment(abc.ABC):
     @abc.abstractmethod

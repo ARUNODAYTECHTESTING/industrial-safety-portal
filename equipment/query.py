@@ -24,6 +24,9 @@ class ScheduleQuery(equipment_interface.ISchedule):
         user_id=user_id,
         ).first()
     def get_schedule_by_assigner_or_auditor(self, assigner_or_auditor):
+        return equipment_models.Schedule.objects.filter(Q(assigned_by=assigner_or_auditor)|Q(user=assigner_or_auditor)).exclude(status="COMPLETED")
+    
+    def get_schedule_by_assigner(self, assigner_or_auditor):
         return equipment_models.Schedule.objects.filter(Q(assigned_by=assigner_or_auditor)|Q(user=assigner_or_auditor))
 
     def update_schedule_status(self,audits):

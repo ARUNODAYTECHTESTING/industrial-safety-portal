@@ -419,7 +419,7 @@ class ScheduleView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         group_names = request.user.groups.values_list('name', flat=True)
         if set(group_names).intersection({"Auditor", "Auditors"}):
-            self.queryset = self.queryset.filter(user=request.user)
+            self.queryset = self.queryset.filter(user=request.user).exclude(status="COMPLETED")
         else:
             self.queryset = equipment_query.ScheduleQuery().get_schedule_by_assigner_or_auditor(request.user)
         
@@ -1165,11 +1165,12 @@ class AuditSummary(generics.ListAPIView):
         group_names = request.user.groups.values_list('name', flat=True)
         if set(group_names).intersection({"Auditor", "Auditors"}):
             queryset = queryset.filter(auditor=request.user)
-        else:
-            user_id = list(equipment_query.ScheduleQuery().get_schedule_by_assigner_or_auditor(request.user).values_list("user_id", flat=True))
-            logger.warning(f"user_id : {user_id}")
-
-            queryset = queryset.filter(auditor__in=user_id)
+        # else:
+            # user_id = list(equipment_query.ScheduleQuery().get_schedule_by_assigner(request.user).values_list("user_id", flat=True))
+            # logger.warning(f"user_id : {user_id}")
+            # user_ids = list(queryset.filter(auditor__manage_by=request.user).values_list("auditor_id", flat=True))
+        user_id = list(queryset.filter(auditor__manage_by=request.user).values_list("auditor_id",flat=True))
+        queryset = queryset.filter(auditor__in=user_id)
         logger.warning(f"queryset found: {queryset}")
         return Response({
             'summary_cards': {
@@ -1286,12 +1287,18 @@ class NotificationSummary(generics.ListAPIView):
             "owner__name",
             "remark",
             "owner__schedule__assigned_by__name",
+            "owner__manage_by",
+            "action_owner"
         ]
 
         try:
+            # schedule by amir -> hritik- ritik sjould get not
+            # ritik done audit -> again amir will get not -> now amir assign to sarukh -> sharukh will get not
+            # now sharukh assigned to jhon -> jhon wll get notification -> jhon he done remark evidance image >
+            # amir will recived notification > approved then closed
             # Filter out completed requests
-            filtered_queryset = base_queryset.exclude(request_status="CLOSED")
-            
+            filtered_queryset = base_queryset.exclude(approve_status="APPROVED")
+            # filtered_queryset = base_queryset
             # Get user groups
             user_groups = set(user.groups.values_list('name', flat=True))
             
@@ -1300,19 +1307,19 @@ class NotificationSummary(generics.ListAPIView):
                 if user.last_login is None:
                     logger.warning(f"User {user.id} has no last_login timestamp")
                     return filtered_queryset.filter(
-                        owner=user
+                        Q(owner=user)|Q(action_auditor=user)
                     ).values(*common_values).distinct()
                     
-                return filtered_queryset.filter(
-                    owner=user,
+                return filtered_queryset.filter(Q(owner=user)|Q(action_auditor=user),
                     updated_at__gt=user.last_login
                 ).values(*common_values).distinct()
-
-           
-                
-            return filtered_queryset.filter(
-                owner__manage_by=user
-            ).values(*common_values).distinct()
+            else:
+                print(f"user found :{user}")
+                print(f"filtered_queryset :{filtered_queryset.filter(owner__manage_by=user)}")
+                    
+                return filtered_queryset.filter(
+                    Q(owner__manage_by=user)|Q(action_owner=user)
+                ).values(*common_values).distinct()
 
         except Exception as e:
             logger.error(f"Error in get_filtered_queryset: {str(e)}")

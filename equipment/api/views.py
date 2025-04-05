@@ -1623,7 +1623,7 @@ class PerformBulkAuditView(generics.CreateAPIView):
                 is_valid_location = shared_utils.CoordinateRangeCalculator(latitude, longitude, checkpoint.equipment.location_radius).is_within_range(user_latitude, user_longitude)
 
                 if not is_valid_location:
-                    return Response({"status": 400, "message": f"You must be within proximity of checkpoint {audit_data.get('checkpoint')}"}, status=400)
+                    return Response({"status": 400, "message": f"You must be within proximity of checkpoint"}, status=400)
 
                 # Find corresponding schedule
                 schedule = equipment_query.ScheduleQuery().get_schedule_by_equipment(

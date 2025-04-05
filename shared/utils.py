@@ -1,4 +1,5 @@
 import math
+from rest_framework.exceptions import ValidationError
 
 class CoordinateRangeCalculator:
     def __init__(self, latitude, longitude, range_meters):
@@ -7,10 +8,14 @@ class CoordinateRangeCalculator:
         self.range_meters = range_meters
     @staticmethod
     def extract_coordinates(coord_string):
-        # Remove parentheses and split by comma
-        lat, lon = coord_string.strip("()").split(",")
-        # Convert to float and return
-        return float(lat), float(lon)
+        try:
+            # Remove parentheses and split by comma
+            lat, lon = coord_string.strip("()").split(",")
+            # Convert to float and return
+            return float(lat), float(lon)
+        except Exception as e:
+            raise ValidationError("Selected equipment does not have valid coordinates.")
+
 
     def calculate_latitude_change(self):
         # 1 degree latitude = 111,000 meters

@@ -1165,13 +1165,13 @@ class AuditSummary(generics.ListAPIView):
         group_names = request.user.groups.values_list('name', flat=True)
         if set(group_names).intersection({"Auditor", "Auditors"}):
             queryset = queryset.filter(auditor=request.user)
-        # else:
+        else:
             # user_id = list(equipment_query.ScheduleQuery().get_schedule_by_assigner(request.user).values_list("user_id", flat=True))
             # logger.warning(f"user_id : {user_id}")
             # user_ids = list(queryset.filter(auditor__manage_by=request.user).values_list("auditor_id", flat=True))
-        user_id = list(queryset.filter(auditor__manage_by=request.user).values_list("auditor_id",flat=True))
-        queryset = queryset.filter(auditor__in=user_id)
-        logger.warning(f"queryset found: {queryset}")
+            user_id = list(queryset.filter(auditor__manage_by=request.user).values_list("auditor_id",flat=True))
+            queryset = queryset.filter(auditor__in=user_id)
+            logger.warning(f"queryset found: {queryset}")
         return Response({
             'summary_cards': {
                 'total_audits': self.get_total_audits(queryset),
@@ -1332,10 +1332,26 @@ class NotificationSummary(generics.ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            queryset = self.get_filtered_queryset(request.user, self.get_queryset())
+            queryset = list(self.get_filtered_queryset(request.user, self.get_queryset()))
+            schedule = list(equipment_query.ScheduleQuery().get_schedule_by_assigner_or_auditor(request.user).values("id","user__name","equipment__name","assigned_by__name","status","schedule_date"))
+            if len(schedule) > 0:
+                schedule = [
+                    {   
+                        "id": s["id"],
+                        "owner__name": s["user__name"],
+                        "checkpoint__equipment__name": s["equipment__name"],
+                        "owner__schedule__assigned_by__name": s["assigned_by__name"],
+                        "request_status": s["status"],
+                        "updated_at": s["schedule_date"].strftime("%Y-%m-%d") if s["schedule_date"] else None,
+                        "remark":"schedule"
+                    }
+                    for s in schedule
+                ]
+
+            result = queryset + schedule
             return Response({
                 "status": 200,
-                "data": list(queryset)  # Explicitly convert to list
+                "data": result  # Explicitly convert to list
             },status=200)
         except Exception as e:
             logger.error(f"Error in get method: {str(e)}")

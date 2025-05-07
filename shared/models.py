@@ -10,4 +10,4 @@ class TimeStamp(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ('id',)
+        ordering = ('-created_at',)

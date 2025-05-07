@@ -12,7 +12,7 @@ class Plant(shared_models.TimeStamp):
     
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = Plant.objects.filter().last()
+            obj = Plant.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
@@ -27,7 +27,7 @@ class Line(shared_models.TimeStamp):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = Line.objects.filter().last()
+            obj = Line.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
@@ -43,7 +43,7 @@ class Station(shared_models.TimeStamp):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = Station.objects.filter().last()
+            obj = Station.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
@@ -57,7 +57,7 @@ class EquipmentType(shared_models.TimeStamp):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = EquipmentType.objects.filter().last()
+            obj = EquipmentType.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
@@ -86,7 +86,7 @@ class Equipment(shared_models.TimeStamp):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = Equipment.objects.filter().last()
+            obj = Equipment.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
@@ -97,7 +97,7 @@ class ScheduleType(shared_models.TimeStamp):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = ScheduleType.objects.filter().last()
+            obj = ScheduleType.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
@@ -124,13 +124,14 @@ class Schedule(shared_models.TimeStamp):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = Schedule.objects.filter().last()
+            obj = Schedule.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.name} is assigned by  {self.assigned_by.name}"
+        
 class MasterAuditParameter(shared_models.TimeStamp):
     name = models.CharField(max_length=64)
 
@@ -139,7 +140,7 @@ class MasterAuditParameter(shared_models.TimeStamp):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = MasterAuditParameter.objects.filter().last()
+            obj = MasterAuditParameter.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
@@ -154,7 +155,7 @@ class Checkpoint(shared_models.TimeStamp):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = Checkpoint.objects.filter().last()
+            obj = Checkpoint.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
@@ -230,7 +231,7 @@ class Observation(shared_models.TimeStamp):
     audit = models.ForeignKey(Audit, on_delete=models.CASCADE,related_name="observation")
     def save(self, *args, **kwargs):
         if self.pk is None:
-            obj = Observation.objects.filter().last()
+            obj = Observation.objects.filter().first()
             if obj:
                 self.id = obj.id + 1
         super().save(*args, **kwargs)

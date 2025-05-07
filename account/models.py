@@ -23,7 +23,7 @@ class Department(shared_models.TimeStamp):
                 self.id = obj.id + 1
         super().save(*args, **kwargs)
     
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin,shared_models.TimeStamp,):
     email = models.EmailField(_("email address"), unique=True)
     phone = models.CharField(max_length=16,null=True,blank=True)
     is_staff = models.BooleanField(default=False)
@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"{self.id}-{self.email}"
     
     class Meta:
+
         permissions = [
             ('can_add_portal_admin', 'Can add portal admin'),
             ('can_delete_portal_admin', 'Can delete portal admin'),
@@ -66,7 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             ('can_change_auditor', 'Can chnage auditor'),
 
         ]
-
+        ordering = ("-created_at",)
     def save(self, *args, **kwargs):
         try:
             if not self.token_id:
@@ -76,5 +77,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             
             super().save(*args, **kwargs)
         except Exception as e:
+            print(f"{e}")
             self.id = User.objects.filter().last().id + 1
             super().save(*args, **kwargs)

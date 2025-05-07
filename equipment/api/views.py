@@ -1171,7 +1171,7 @@ class AuditSummary(generics.ListAPIView):
             # user_ids = list(queryset.filter(auditor__manage_by=request.user).values_list("auditor_id", flat=True))
             user_id = list(queryset.filter(auditor__manage_by=request.user).values_list("auditor_id",flat=True))
             queryset = queryset.filter(auditor__in=user_id)
-            logger.warning(f"queryset found: {queryset}")
+            logger.warning(f"queryset found: {len(queryset)}")
         return Response({
             'summary_cards': {
                 'total_audits': self.get_total_audits(queryset),
@@ -1373,7 +1373,13 @@ class AuditorAuditSummary(generics.ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         # Comprehensive Auditor Performance Tracking
-        auditor_performance = self.queryset.annotate(
+        queryset = self.queryset
+        # group_names = request.user.groups.values_list('name', flat=True)
+        # if set(group_names).intersection({"Auditor", "Auditors"}):
+        #     queryset = queryset.filter(auditor=request.user)
+        # else:
+        #     queryset = queryset.filter(auditor__manage_by=request.user)
+        auditor_performance = queryset.annotate(
             # Audit Counts
             total_audits=Count('audits', distinct=True),
             completed_audits=Count('audits', filter=Q(observations__request_status='CLOSED'), distinct=True),

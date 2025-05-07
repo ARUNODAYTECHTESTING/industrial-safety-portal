@@ -27,7 +27,7 @@ urlpatterns = [
     path("filter-data/",equipment_views.FilterDataView.as_view(),name = 'filter-data'),
     path("audit-summery/",equipment_views.AuditSummary.as_view(),name = 'audit-summery'),
     path("auditor-summery/",equipment_views.AuditorAuditSummary.as_view(),name = 'auditor-summery'),
-    path("notification/",equipment_views.NotificationSummary.as_view(),name = 'notification'),
+    path("dashboard/notification/",equipment_views.NotificationSummary.as_view(),name = 'notification'),
     # TODO: Audit
     path("perform-audit/",equipment_views.PerformAuditView.as_view(),name = 'perform-audit'),
     path("perform-audit-details/<int:pk>/",equipment_views.PerformAuditDetailsView.as_view(),name = 'perform-audit-details'),

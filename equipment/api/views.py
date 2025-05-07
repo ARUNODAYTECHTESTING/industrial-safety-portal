@@ -1185,111 +1185,15 @@ class AuditSummary(generics.ListAPIView):
             'monthly_summary': self.get_monthly_data(queryset)
         })
 
-# class NotificationSummary(generics.ListAPIView):
-#     permission_classes = [permissions.IsAuthenticated]
-#     queryset = equipment_models.Audit.objects.all()
-#     serializer_class = equipment_serializers.AuditSummarySerializer
-
-#     def get_filtered_queryset(self, user, base_queryset):
-#         """Helper method to get filtered queryset based on user role"""
-#         if not user or not base_queryset:
-#             logger.warning("User or base_queryset is None")
-#             return []
-
-#         common_values = [
-#             "id",
-#             "checkpoint__equipment__name",
-#             "updated_at",
-#             "request_status",
-#             "auditor__name",
-#             "remark",
-#             "auditor__schedule__assigned_by__name",
-#         ]
-
-#         try:
-#             # Filter out completed requests
-#             filtered_queryset = base_queryset.exclude(request_status="CLOSED")
-            
-#             # Get user groups
-#             user_groups = set(user.groups.values_list('name', flat=True))
-            
-#             # Check if user is an auditor
-#             if "Auditor" in user_groups or "Auditors" in user_groups:
-#                 if user.last_login is None:
-#                     logger.warning(f"User {user.id} has no last_login timestamp")
-#                     return filtered_queryset.filter(
-#                         auditor=user
-#                     ).values(*common_values)
-                    
-#                 return filtered_queryset.filter(
-#                     auditor=user,
-#                     updated_at__gt=user.last_login
-#                 ).values(*common_values)
-
-#             # For non-auditors
-#             schedule_query = equipment_query.ScheduleQuery()
-#             assigned_users = schedule_query.get_schedule_by_assigner_or_auditor(user)
-            
-#             if assigned_users is None:
-#                 logger.warning(f"No assigned users found for user {user.id}")
-#                 return []
-                
-#             user_ids = assigned_users.values_list("user_id", flat=True)
-            
-#             if not user_ids:
-#                 logger.warning(f"Empty user_ids list for user {user.id}")
-#                 return []
-                
-#             return filtered_queryset.filter(
-#                 auditor__in=list(user_ids)
-#             ).values(*common_values)
-
-#         except Exception as e:
-#             logger.error(f"Error in get_filtered_queryset: {str(e)}")
-#             return []
-
-#     @swagger_auto_schema(
-#         tags=['Audit'],
-#         operation_summary="Comprehensive Audit Overview",
-#         operation_description="Retrieve detailed audit statistics including total audits, compliance score, and status breakdown"
-#     )
-#     def get(self, request, *args, **kwargs):
-#         try:
-#             queryset = self.get_filtered_queryset(request.user, self.get_queryset())
-#             return Response({
-#                 "status": 200,
-#                 "data": list(queryset)  # Explicitly convert to list
-#             },status=200)
-#         except Exception as e:
-#             logger.error(f"Error in get method: {str(e)}")
-#             return Response({
-#                 "status": 500,
-#                 "error": "An error occurred while processing your request",
-#                 "detail": str(e)
-#             }, status=500)
 
 class NotificationSummary(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = equipment_models.Observation.objects.all()
     serializer_class = equipment_serializers.ObservationSerializer
 
-    def get_filtered_queryset(self, user, base_queryset):
-        """Helper method to get filtered queryset based on user role"""
-        if not user or not base_queryset:
-            logger.warning("User or base_queryset is None")
+    def get_observation_notification(self,user = None,queryset = None):
+        if not user or not queryset:
             return []
-
-        common_values = [
-            "id",
-            "checkpoint__equipment__name",
-            "updated_at",
-            "request_status",
-            "owner__name",
-            "remark",
-            "owner__schedule__assigned_by__name",
-            "owner__manage_by",
-            "action_owner"
-        ]
 
         try:
             # schedule by amir -> hritik- ritik sjould get not
@@ -1297,33 +1201,70 @@ class NotificationSummary(generics.ListAPIView):
             # now sharukh assigned to jhon -> jhon wll get notification -> jhon he done remark evidance image >
             # amir will recived notification > approved then closed
             # Filter out completed requests
-            filtered_queryset = base_queryset.exclude(approve_status="APPROVED")
-            # filtered_queryset = base_queryset
-            # Get user groups
+            filtered_queryset = queryset.exclude(approve_status="APPROVED")
             user_groups = set(user.groups.values_list('name', flat=True))
             
-            # Check if user is an auditor
             if "Auditor" in user_groups or "Auditors" in user_groups:
                 if user.last_login is None:
-                    logger.warning(f"User {user.id} has no last_login timestamp")
-                    return filtered_queryset.filter(
-                        Q(owner=user)|Q(action_auditor=user)
-                    ).values(*common_values).distinct()
-                    
-                return filtered_queryset.filter(Q(owner=user)|Q(action_auditor=user),
-                    updated_at__gt=user.last_login
-                ).values(*common_values).distinct()
+                    return filtered_queryset.filter(Q(owner=user)|Q(action_auditor=user)).distinct()
+
+                return filtered_queryset.filter(Q(owner=user)|Q(action_auditor=user),updated_at__gt=user.last_login).distinct()
             else:
-                print(f"user found :{user}")
-                print(f"filtered_queryset :{filtered_queryset.filter(owner__manage_by=user)}")
-                    
-                return filtered_queryset.filter(
-                    Q(owner__manage_by=user)|Q(action_owner=user)
-                ).values(*common_values).distinct()
+                return filtered_queryset.filter(Q(owner__manage_by=user)|Q(action_owner=user)).distinct()
 
         except Exception as e:
-            logger.error(f"Error in get_filtered_queryset: {str(e)}")
             return []
+
+    def get_schedule_notification(self,user = None,queryset = None):
+        return equipment_query.ScheduleQuery().get_schedule_by_assigner_or_auditor(user)
+        
+
+    def get_normal_notification(self,user = None,queryset = None):
+        pass
+    
+    def update_observation_notification_response(self,queryset = None):
+        response = []
+
+        for obj in queryset:
+            notification = {
+                "id": obj.id,
+                "notification_type": "observation",
+                "updated_at": obj.updated_at,
+                "created_at": obj.created_at
+            }
+            
+            if obj.action_owner:
+                notification["notification_title"] = f"New Observation Assigned to {obj.action_owner}"
+                notification["notification_description"] = f"{obj.owner.manage_by} Assigned a new observation to you"
+                notification["tasker"] = obj.action_owner
+            if obj.action_auditor:
+                notification["notification_title"] = f"New Observation Assigned to {obj.action_auditor}"
+                notification["notification_description"] = f"{obj.action_owner} Assigned a new observation to you"
+                notification["tasker"] = obj.action_auditor
+            else:
+                notification["notification_title"] = f"New Observation created  by {obj.owner}"
+                notification["notification_description"] = f"Assigned/Reassigned a new observation"
+                notification["tasker"] = "N/A"
+            response.append(notification)
+
+        
+        return response
+    
+    def update_schedule_notification(self,queryset = None):
+        response = []
+
+        for obj in queryset:
+            response.append({
+                "id": obj.id,
+                "notification_type": "schedule",
+                "updated_at": obj.updated_at,
+                "created_at": obj.schedule_date,
+                "notification_title": "New Task Assigned to you",
+                "notification_description": f"{obj.assigned_by} Assigned a new Task to you",
+                "tasker":obj.user.name
+            })
+
+        return response
 
     @swagger_auto_schema(
         tags=['Audit'],
@@ -1332,29 +1273,16 @@ class NotificationSummary(generics.ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            queryset = list(self.get_filtered_queryset(request.user, self.get_queryset()))
-            schedule = list(equipment_query.ScheduleQuery().get_schedule_by_assigner_or_auditor(request.user).values("id","user__name","equipment__name","assigned_by__name","status","schedule_date"))
-            if len(schedule) > 0:
-                schedule = [
-                    {   
-                        "id": s["id"],
-                        "owner__name": s["user__name"],
-                        "checkpoint__equipment__name": s["equipment__name"],
-                        "owner__schedule__assigned_by__name": s["assigned_by__name"],
-                        "request_status": s["status"],
-                        "updated_at": s["schedule_date"].strftime("%Y-%m-%d") if s["schedule_date"] else None,
-                        "remark":"schedule"
-                    }
-                    for s in schedule
-                ]
-
-            result = queryset + schedule
+            observation = self.get_observation_notification(request.user,self.get_queryset())
+            observation_res = self.update_observation_notification_response(observation)
+            schedule = self.get_schedule_notification(request.user, None)
+            schedule_res = self.update_schedule_notification(schedule)
+            result = observation_res + schedule_res
             return Response({
                 "status": 200,
                 "data": result  # Explicitly convert to list
             },status=200)
         except Exception as e:
-            logger.error(f"Error in get method: {str(e)}")
             return Response({
                 "status": 500,
                 "error": "An error occurred while processing your request",

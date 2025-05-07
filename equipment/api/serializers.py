@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from equipment import models as equipment_models
 from account.api import serializers as account_api_serializers
+from django.utils import timezone
+
 class EquipmentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = equipment_models.EquipmentType
@@ -84,7 +86,11 @@ class ScheduleSerializer(serializers.ModelSerializer):
         shedule_serializer =ScheduleTypeSerializer(instance.schedule_type).data
         representation['schedule_type'] = {'id':shedule_serializer.get('id'),'name':shedule_serializer.get('name')}
         representation['user'] = {"id":instance.user.id, 'name':instance.user.name}
+        print("NOW:", timezone.now())
+        print("SCHEDULE_DATE:", instance.schedule_date)
+
         representation['assigned_by'] = {"id":instance.assigned_by.id, 'name':instance.assigned_by.name}
+        representation['status'] = "OVERDUE" if timezone.now() > instance.schedule_date else "PENDING"
         return representation
    
 

@@ -28,12 +28,28 @@ services:
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
+      - certbot_certs:/etc/letsencrypt
+      - certbot_certs_data:/var/lib/letsencrypt
+      - ./letsencrypt_webroot:/var/lib/letsencrypt/webroot
     ports:
       - 80:80
     depends_on:
       - web
   
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d
+      - certbot_certs:/etc/letsencrypt
+      - certbot_certs_data:/var/lib/letsencrypt
+      - ./letsencrypt_webroot:/var/lib/letsencrypt/webroot
+    depends_on:
+      - nginx
+
+
 volumes:
   postgres_data:
   static_volume:
   media_volume:
+  certbot_certs:
+  certbot_certs_data:

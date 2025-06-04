@@ -26,7 +26,7 @@ if not settings.DEBUG:
             title="OCR API",
             default_version='v1',
         ),
-        url='https://aegixcore.com/',
+        url='https://dashboard.aegixcore.com/',
         public=True,
         permission_classes=(permissions.AllowAny,),
     )
